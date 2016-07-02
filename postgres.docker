@@ -1,0 +1,18 @@
+FROM ubuntu:trusty
+
+RUN locale-gen en_CA.UTF-8
+ENV LANG en_CA.UTF-8
+
+RUN apt-get update && \
+	apt-get install postgresql-9.3 -y
+
+USER postgres
+
+VOLUME /var/lib/postgresql/9.3/main
+
+EXPOSE 5432
+
+ENV PGDATA /var/lib/postgresql/9.3/main
+
+CMD ["/usr/lib/postgresql/9.3/bin/postgres", "-c", "config_file=/etc/postgresql/9.3/main/postgresql.conf"]
+
