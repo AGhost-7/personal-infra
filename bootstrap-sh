@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Script bootstraps the entire cluster.
+docker-compose run -u root postgres bash bootstrap-db.sh
+
