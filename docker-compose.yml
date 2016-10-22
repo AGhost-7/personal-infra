@@ -8,5 +8,7 @@ services:
       - 9000:9000
     depends_on:
       - mongo
+    volumes:
+      - /root/.ivy2:/var/cache/ivy2
   mongo:
     image: mongo
