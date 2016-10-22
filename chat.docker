@@ -9,6 +9,7 @@ RUN apk update && \
 
 WORKDIR /chat
 
-RUN sbt clean stage
+RUN sbt clean compile stage && \
+	rm -rf /root/.ivy2/*
 
 CMD ["/chat/target/universal/stage/bin/ninja-chat"]
