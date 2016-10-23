@@ -1,9 +1,7 @@
 version: '2'
 services:
   chat:
-    build:
-      context: .
-      dockerfile: chat.docker
+    image: aghost7/ninja-chat
     ports:
       - 9000:9000
     depends_on:
