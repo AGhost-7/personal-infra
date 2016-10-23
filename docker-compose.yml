@@ -1,11 +1,16 @@
 version: '2'
 services:
-  node-shop:
-    image: localhost:5000/node-shop
-    environment:
-      - NODE_SHOP_DBHOST=postgres
-    links:
-      - postgres
-  postgres:
-    image: localhost:5000/postgres
-
+  front:
+    image: aghost7/portfolio-front
+    depends_on:
+      - chat
+  chat:
+    image: aghost7/ninja-chat
+    ports:
+      - 9000:9000
+    depends_on:
+      - mongo
+    volumes:
+      - /root/.ivy2:/var/cache/ivy2
+  mongo:
+    image: mongo
