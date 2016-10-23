@@ -1,0 +1,7 @@
+# vim: set ft=dockerfile :
+
+from nginx
+
+copy ./chat.nginx.conf /etc/nginx/conf.d/chat.conf
+
+

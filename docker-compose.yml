@@ -1,5 +1,9 @@
 version: '2'
 services:
+  front:
+    image: aghost7/portfolio-front
+    depends_on:
+      - chat
   chat:
     image: aghost7/ninja-chat
     ports:
