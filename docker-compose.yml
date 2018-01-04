@@ -1,9 +1,12 @@
 version: '2'
 services:
   front:
-    image: aghost7/portfolio-front
+    image: nginx
     depends_on:
       - chat
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ./conf.d:/etc/nginx/conf.d
     ports:
       - 80:80
       - 443:443
@@ -15,5 +18,9 @@ services:
       - mongo
     volumes:
       - /root/.ivy2:/var/cache/ivy2
+  certbot:
+    image: aghost7/certbot
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
   mongo:
     image: mongo

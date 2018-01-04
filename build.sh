@@ -4,6 +4,3 @@ set -e
 
 docker build -t aghost7/ninja-chat -f chat.docker .
 docker push aghost7/ninja-chat
-
-docker build -t aghost7/portfolio-front -f front.docker .
-docker push aghost7/portfolio-front
