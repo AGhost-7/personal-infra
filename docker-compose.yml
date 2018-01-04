@@ -4,6 +4,9 @@ services:
     image: aghost7/portfolio-front
     depends_on:
       - chat
+    ports:
+      - 80:80
+      - 443:443
   chat:
     image: aghost7/ninja-chat
     ports:
