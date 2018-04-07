@@ -1,5 +1,23 @@
 version: '2'
 services:
+  netdata:
+    build: ./images/netdata
+    group_add:
+      - 999
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/log/netdata:/var/log/netdata
+      - /var/cache/netdata:/var/cache/netdata
+      - /run/docker.sock:/var/run/docker.sock
+    privileged: true
+    # https://github.com/titpetric/netdata#using
+    cap_add:
+      - SYS_PTRACE
+    ports:
+      # Use an ssh tunnel to access the frontend - for now.
+      # ssh -L 19999:localhost:19999 root@jonathan-boudreau.com -N
+      - 127.0.0.1:19999:19999
   front:
     image: nginx
     depends_on:
