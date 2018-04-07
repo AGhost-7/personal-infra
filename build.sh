@@ -2,5 +2,5 @@
 
 set -e
 
-docker build -t aghost7/ninja-chat -f chat.docker .
+docker build --no-cache -t aghost7/ninja-chat -f chat.docker .
 docker push aghost7/ninja-chat

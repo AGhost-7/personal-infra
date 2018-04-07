@@ -12,13 +12,13 @@ services:
       - 443:443
   chat:
     image: aghost7/ninja-chat
-    ports:
-      - 9000:9000
     depends_on:
       - mongo
     volumes:
       - /root/.ivy2:/var/cache/ivy2
   certbot:
+    ports:
+      - 6000:6000
     image: aghost7/certbot
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt

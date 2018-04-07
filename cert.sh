@@ -9,15 +9,15 @@ fi
 
 docker run -ti \
 	--rm \
-	-p 80:80 \
-	-p 443:443 \
+	-p 6000:6000 \
 	-v /etc/letsencrypt:/etc/letsencrypt \
 	aghost7/certbot \
 	certbot certonly \
 		--standalone \
 		--agree-tos \
+		--preferred-challenges http \
+		--http-01-port 6000 \
 		--no-eff-email \
 		--email "$1" \
-		-d www.jonathan-boudreau.com \
 		-d jonathan-boudreau.com \
 		-d chat.jonathan-boudreau.com
