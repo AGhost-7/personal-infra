@@ -2,6 +2,11 @@ global:
   scrape_interval: 30s
   evaluation_interval: 30s
 scrape_configs:
+
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090']
+
   - job_name: 'netdata'
     metrics_path: '/api/v1/allmetrics'
     params:
@@ -12,3 +17,5 @@ scrape_configs:
     dns_sd_configs:
     - names:
       - 'private.jonathan-boudreau.com'
+      type: 'A'
+      port: 19999
