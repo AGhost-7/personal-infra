@@ -27,6 +27,11 @@ variable "ssh_pub_key" {
 	default = "~/.ssh/do.pub"
 }
 
+# Maybe use:
+# openssl rand -hex 20
+variable "init_token" {
+}
+
 # }}}
 
 # {{{ providers
@@ -50,8 +55,15 @@ resource "digitalocean_droplet" "master" {
 	private_networking = true
 	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
 
+	provisioner "file" {
+		source = "files/10-kubadm.conf"
+		destination = "/etc/systemd/kubelet.service.d/10-kubeadm.conf"
+	}
+
 	provisioner "remote-exec" {
 		inline = [
+			"kubeadm init --ignore-preflight-errors Swap --pod-network-cidr=10.244.0.0/16 --token ${var.init_token}",
+			"KUBECONFIG=/etc/kubernetes/admin.conf kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml"
 		]
 	}
 }
