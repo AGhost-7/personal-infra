@@ -56,12 +56,13 @@ resource "digitalocean_droplet" "master" {
 	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
 
 	provisioner "file" {
-		source = "files/10-kubadm.conf"
-		destination = "/etc/systemd/kubelet.service.d/10-kubeadm.conf"
+		source = "./files/10-kubeadm.conf"
+		destination = "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
 	}
 
 	provisioner "remote-exec" {
 		inline = [
+			"systemctl daemon-reload",
 			"kubeadm init --ignore-preflight-errors Swap --pod-network-cidr=10.244.0.0/16 --token ${var.init_token}",
 			"KUBECONFIG=/etc/kubernetes/admin.conf kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml"
 		]
@@ -76,8 +77,15 @@ resource "digitalocean_droplet" "front" {
 	private_networking = true
 	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
 
+	provisioner "file" {
+		source = "./files/10-kubeadm.conf"
+		destination = "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+	}
+
 	provisioner "remote-exec" {
 		inline = [
+			"systemctl daemon-reload",
+			"kubeadm join ${digitalocean_droplet.master.ipv4_address_private}:6443 --discovery-token-unsafe-skip-ca-verification --ignore-preflight-errors Swap --token ${var.init_token}"
 		]
 	}
 }
@@ -89,9 +97,16 @@ resource "digitalocean_droplet" "metric" {
 	size = "${var.size}"
 	private_networking = true
 	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+
+	provisioner "file" {
+		source = "./files/10-kubeadm.conf"
+		destination = "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+	}
 	
 	provisioner "remote-exec" {
 		inline = [
+			"systemctl daemon-reload",
+			"kubeadm join ${digitalocean_droplet.master.ipv4_address_private}:6443 --discovery-token-unsafe-skip-ca-verification --ignore-preflight-errors Swap --token ${var.init_token}"
 		]
 	}
 }
