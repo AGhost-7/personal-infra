@@ -2,3 +2,8 @@
   hosts: gitlab
   roles:
     - gitlab
+
+- name: load balancer
+  hosts: front
+  roles:
+    - load_balancer

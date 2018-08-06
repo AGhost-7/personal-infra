@@ -1,17 +1,9 @@
 version: '2'
 services:
-  front:
-    image: nginx
-    depends_on:
-      - chat
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - ./conf.d:/etc/nginx/conf.d
-    ports:
-      - 80:80
-      - 443:443
   chat:
     image: aghost7/ninja-chat
+    ports:
+      - 127.0.0.1:9000:9000
     depends_on:
       - mongo
     volumes:

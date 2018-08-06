@@ -1,0 +1,26 @@
+
+- name: load balancer container
+  docker_container:
+    name: load_balancer
+    image: nginx
+    volumes:
+      # TODO: Find a convention for shared volumes. Putting stuff in
+      # `/var/containers/$container_name` at the moment but, this volume needs
+      # to be shared with the load balancer and certbot container. Will move
+      # out of original location once I can think of a good convention for
+      # this. Maybe `/var/containers/_shared`?
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/containers/load_balancer/conf.d:/etc/nginx/conf.d
+    network_mode: host
+
+- name: generate gitlab configuration
+  template:
+    src: templates/gitlab.nginx.conf.j2
+    dest: /var/containers/load_balancer/conf.d/gitlab.nginx.conf
+  notify:
+    - "reload nginx"
+
+- name: generate chat configuration
+  template:
+    src: templates/chat.nginx.conf.j2
+    dest: /var/containers/load_balancer/conf.d/chat.nginx.conf
