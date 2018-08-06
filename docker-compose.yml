@@ -1,7 +1,7 @@
 version: '2'
 services:
   chat:
-    image: aghost7/ninja-chat
+    image: ./images/chat
     ports:
       - 127.0.0.1:9000:9000
     depends_on:
@@ -11,8 +11,9 @@ services:
   certbot:
     ports:
       - 6000:6000
-    image: aghost7/certbot
+    image: ./images/certbot
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
+      - /etc/certbot/secrets:/etc/certbot/secrets
   mongo:
     image: mongo

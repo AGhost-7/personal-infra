@@ -1,0 +1,2 @@
+
+30 2 * * * /usr/local/bin/certbot renew --renew-hook /renew-hook.sh --standalone --server https://acme-v02.api.letsencrypt.org/directory --dsn-digitalocean --dns-digitalocean-credentials /etc/certbot/secrets/digitalocean.ini

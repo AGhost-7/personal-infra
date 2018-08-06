@@ -2,22 +2,24 @@
 
 set -e
 
-if [ -z "$1" ]; then
-	echo -e '\033[0;31mEmail must be specified as the first parameter to this script\033[0;0m'
+if [ -z "$EMAIL" ]; then
+	echo -e '\033[0;31mEMAIL environment variable must be specified\033[0;0m'
 	exit 1
 fi
 
 docker run -ti \
 	--rm \
-	-p 6000:6000 \
 	-v /etc/letsencrypt:/etc/letsencrypt \
-	aghost7/certbot \
-	certbot certonly \
-		--standalone \
+	-v /etc/certbot/secrets:/etc/certbot/secrets \
+	certbot/dns-digitalocean \
+	certonly \
+		--server https://acme-v02.api.letsencrypt.org/directory \
+		--dns-digitalocean \
+		--dns-digitalocean-credentials /etc/certbot/secrets/digitalocean.ini \
+		--expand \
+		--noninteractive \
 		--agree-tos \
-		--preferred-challenges http \
-		--http-01-port 6000 \
 		--no-eff-email \
-		--email "$1" \
+		--email "$EMAIL" \
 		-d jonathan-boudreau.com \
-		-d chat.jonathan-boudreau.com
+		-d '*.jonathan-boudreau.com'
