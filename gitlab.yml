@@ -1,0 +1,4 @@
+- name: gitlab
+  hosts: gitlab
+  roles:
+    - gitlab

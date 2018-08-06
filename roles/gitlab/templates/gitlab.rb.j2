@@ -5,7 +5,9 @@ nginx['listen_port'] = 80
 
 nginx['listen_https'] = false
 nginx['http2_enabled'] = false
-nginx['real_ip_trusted_addresses'] = ['138.197.153.75']
+nginx['real_ip_trusted_addresses'] = [
+	'{{groups['front'][0]}}'
+]
 
 nginx['real_ip_header'] = 'X-Real-IP'
 nginx['real_ip_recursive'] = 'on'

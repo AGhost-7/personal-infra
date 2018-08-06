@@ -1,0 +1,8 @@
+# for some reason the `ping` module in ansible doesn't load the group vars
+# that I'm using to specify the ssh user and key...
+- name: ping
+  hosts: all
+  tasks:
+    - name: ls
+      shell: ls
+
