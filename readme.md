@@ -5,7 +5,7 @@ The host uses the following packer build to run on digital ocean:
 https://github.com/AGhost-7/digitalocean-image-docker
 
 ## Directory structure
-The base directory structure is organised on the following way:
+The base directory structure is organized on the following way:
 - `images`: Docker images.
 - `roles`: Ansible roles.
 - `files`: Misc files.
