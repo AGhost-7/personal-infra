@@ -1,9 +1,9 @@
 - name: reconfigure gitlab
-  shell: docker exec -i gitlab gitlab-ctl reconfigure
+  shell: docker exec gitlab gitlab-ctl reconfigure
   listen:
     - "reload gitlab"
 
 - name: restart gitlab
-  shell: docker exec -i gitlab gitlab-ctl restart
+  shell: docker exec gitlab gitlab-ctl restart
   listen:
     - "reload gitlab"

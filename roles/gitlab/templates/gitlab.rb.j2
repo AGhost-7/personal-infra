@@ -3,6 +3,7 @@
 external_url 'https://gitlab.jonathan-boudreau.com'
 nginx['listen_port'] = 80
 
+# reverse proxy is taking care of this
 nginx['listen_https'] = false
 nginx['http2_enabled'] = false
 nginx['real_ip_trusted_addresses'] = [
