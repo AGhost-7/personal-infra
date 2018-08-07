@@ -1,3 +1,8 @@
+- name: known hosts
+  hosts: tf
+  roles:
+    - known_hosts
+
 - name: gitlab
   hosts: gitlab
   roles:
