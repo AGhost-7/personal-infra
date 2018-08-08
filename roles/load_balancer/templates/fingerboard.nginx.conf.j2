@@ -1,7 +1,7 @@
 
 server {
 	listen 80;
-	server_name chat.jonathan-boudreau.com;
+	server_name fingerboard.jonathan-boudreau.com;
 
 	location / {
 		return 301 https://fingerboard.jonathan-boudreau.com$request_uri;
@@ -11,10 +11,15 @@ server {
 server {
 	listen 443 ssl;
 
-	server_name chat.jonathan-boudreau.com;
+	server_name fingerboard.jonathan-boudreau.com;
 	ssl_certificate /etc/letsencrypt/live/jonathan-boudreau.com/fullchain.pem;
 	ssl_certificate_key /etc/letsencrypt/live/jonathan-boudreau.com/privkey.pem;
 
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-Ssl on;
+	proxy_set_header X-Forwarded-Host fingerboard.jonathan-boudreau.com;
+	proxy_set_header X-Forwarded-Proto https;
 
 	location / {
 		proxy_pass http://localhost:8000;

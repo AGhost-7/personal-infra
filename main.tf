@@ -86,14 +86,14 @@ resource "digitalocean_record" "gitlab" {
 	domain = "jonathan-boudreau.com"
 	name = "gitlab"
 	type = "CNAME"
-	value = "@"
+	value = "jonathan-boudreau.com."
 }
 
 resource "digitalocean_record" "fingerboard" {
 	domain = "jonathan-boudreau.com"
-	name = "fingerboard."
+	name = "fingerboard"
 	type = "CNAME"
-	value = "@"
+	value = "jonathan-boudreau.com."
 }
 
 # }}}
