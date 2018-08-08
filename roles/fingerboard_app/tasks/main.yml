@@ -1,0 +1,6 @@
+- name: docker container
+  docker_container:
+    name: fingerboard
+    image: aghost7/fingerboard.js
+    ports:
+      - 127.0.0.1:8000:8000

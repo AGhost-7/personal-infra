@@ -24,3 +24,12 @@
   template:
     src: templates/chat.nginx.conf.j2
     dest: /var/containers/load_balancer/conf.d/chat.nginx.conf
+  notify:
+    - "reload nginx"
+
+- name: generate fingerboard.js configuration
+  template:
+    src: templates/fingerboard.nginx.conf.j2
+    dest: /var/containers/load_balancer/conf.d/fingerboard.nginx.conf
+  notify:
+    - "reload nginx"

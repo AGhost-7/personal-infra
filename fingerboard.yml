@@ -1,0 +1,10 @@
+- name: known hosts
+  hosts: tf
+  roles:
+    - known_hosts
+
+- name: spin up fingerboard app
+  hosts: front
+  roles:
+    - fingerboard_app
+    - load_balancer
