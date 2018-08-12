@@ -1,0 +1,48 @@
+
+# See the sshd_config(5) manpage for details
+
+# What ports, IPs and protocols we listen for
+Port 22
+
+Protocol 2
+
+# HostKeys for protocol version 2
+HostKey /keys/ssh_host_rsa_key
+HostKey /keys/ssh_host_dsa_key
+HostKey /keys/ssh_host_ecdsa_key
+HostKey /keys/ssh_host_ed25519_key
+
+# place the authorized keys file in a location where a volume can be
+# easily added.
+AuthorizedKeysFile	/keys/authorized_keys/%u
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Authentication:
+LoginGraceTime 120
+PermitRootLogin no
+StrictModes yes
+
+PubkeyAuthentication yes
+
+# Don't read the user's ~/.rhosts and ~/.shosts files
+IgnoreRhosts yes
+
+# similar for protocol version 2
+HostbasedAuthentication no
+
+# To enable empty passwords, change to yes (NOT RECOMMENDED)
+PermitEmptyPasswords no
+
+# Change to yes to enable challenge-response passwords (beware issues with
+# some PAM modules and threads)
+ChallengeResponseAuthentication no
+
+# Change to no to disable tunnelled clear text passwords
+PasswordAuthentication no
+
+X11Forwarding no
+PrintMotd no
+TCPKeepAlive yes

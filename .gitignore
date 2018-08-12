@@ -2,6 +2,6 @@
 *.tfstate.backup
 /.terraform
 .terraform.tfstate.lock.info
-/group_vars
+/environments
 *.retry
 *.swp

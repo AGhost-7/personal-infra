@@ -21,3 +21,14 @@ made.
 remaining legacy setup.
 - `*.yml`: Ansible playbooks.
 - `main.tf`: Terraform configuration
+
+## Setup
+Clone and create the directory containing the inventory information:
+```
+git clone git@github.com:AGhost-7/personal-infra
+cd personal-infra
+git submodule --init update
+mkdir environments
+# symlink the dynamic inventory script
+ln -s '../ansible/contrib/inventory/digital_ocean.py' environments/inventory.py
+```

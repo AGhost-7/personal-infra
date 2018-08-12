@@ -57,36 +57,53 @@ resource "digitalocean_tag" "default" {
 	name = "${var.namespace}"
 }
 
+resource "digitalocean_tag" "ci" {
+	name = "ci"
+}
+
 # }}}
 
 # {{{ machines
 
-resource "digitalocean_droplet" "gitlab" {
-	name = "${var.namespace}-gitlab"
+resource "digitalocean_droplet" "ci" {
+	name = "ci"
 	image = "${var.image}"
 	region = "${var.region}"
 	size = "${var.size}"
 	private_networking = true
 	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
-	tags = ["${digitalocean_tag.default.id}", "gitlab"]
+	tags = ["${digitalocean_tag.default.id}", "ci"]
+
+	provisioner "remote-exec" {
+		inline = [
+			"sed -i 's/Port 22/Port 2222/' /etc/ssh/sshd_config",
+			"systemctl restart ssh"
+		]
+	}
+
+	# add the host key
+	provisioner "local-exec" {
+		command =
+			"(ssh-keyscan -p 2222 ${digitalocean_droplet.ci.ipv4_address}; cat ~/.ssh/known_hosts) | sort -u > ~/.ssh/known_hosts"
+	}
 }
 
 # }}}
 
 # {{{ dns
 
-resource "digitalocean_record" "private_gitlab" {
+resource "digitalocean_record" "private_ci" {
 	domain = "jonathan-boudreau.com"
 	name = "private"
 	type = "A"
-	value = "${digitalocean_droplet.gitlab.ipv4_address_private}"
+	value = "${digitalocean_droplet.ci.ipv4_address_private}"
 }
 
-resource "digitalocean_record" "gitlab" {
+resource "digitalocean_record" "git" {
 	domain = "jonathan-boudreau.com"
-	name = "gitlab"
-	type = "CNAME"
-	value = "jonathan-boudreau.com."
+	name = "git"
+	type = "A"
+	value = "${digitalocean_droplet.ci.ipv4_address}"
 }
 
 resource "digitalocean_record" "fingerboard" {

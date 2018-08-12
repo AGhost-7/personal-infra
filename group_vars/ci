@@ -1,0 +1,5 @@
+# vim: set ft=yaml:
+ansible_ssh_port: 2222
+git_repos:
+  - fingerboard
+  - rock-paper-assembly

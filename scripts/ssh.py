@@ -25,5 +25,9 @@ droplets = response.json()['droplets']
 
 ip = droplets[0]['networks']['v4'][0]['ip_address']
 
+port = 22
+if tag == 'ci':
+    port = 2222
+
 # bit of syscall magic...
-execlp('ssh', '-i' '~/.ssh/do', 'root@{}'.format(ip))
+execlp('ssh', 'ssh', '-p', str(port), '-i', '~/.ssh/do', 'root@{}'.format(ip))

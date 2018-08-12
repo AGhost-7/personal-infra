@@ -6,4 +6,4 @@ set -e
 terraform apply
 
 # run playbook to create fingerboard app container, etc
-ansible-playbook -i environments/inventory.py fingerboard.yml
+ansible-playbook -i environments/inventory.py ci.yml

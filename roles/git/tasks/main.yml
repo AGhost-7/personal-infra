@@ -1,0 +1,31 @@
+- name: ensure keys directory exists
+  file:
+    state: directory
+    path: /var/containers/git/keys/authorized_keys
+
+- name: add public key to authorized_keys
+  lineinfile:
+    path: /var/containers/git/keys/authorized_keys/git
+    line: "{{lookup('file', ci_local_ssh_public_key)}}"
+
+- name: git docker container
+  docker_container:
+    image: aghost7/git-server
+    name: git
+    volumes:
+      - /var/containers/git/repos:/repos
+      - /var/containers/git/keys:/keys
+    ports:
+      - 0.0.0.0:22:22
+
+- name: ensure repos are initialized
+  with_items: "{{git_repos}}"
+  register: git_repos
+  changed_when: git_repos.stdout_lines|length > 0
+  args:
+    chdir: /var/containers/git/repos
+  shell: |
+    if [ ! -d "{{item}}.git" ]; then
+      git init --bare "{{item}}".git
+    fi
+
