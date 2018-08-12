@@ -1,5 +1,16 @@
 
-- name: git
+- name: setup ci server
   hosts: ci
   roles:
     - git
+    - jenkins
+
+- name: load balancer
+  hosts: front
+  roles:
+    - load_balancer
+
+- name: jenkins ssh access
+  hosts: front
+  roles:
+    - jenkins_ssh

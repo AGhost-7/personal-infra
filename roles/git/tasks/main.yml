@@ -11,9 +11,12 @@
     path: /var/containers/git/keys/authorized_keys
 
 - name: add public key to authorized_keys
+  with_items:
+    - "{{ci_local_ssh_public_key}}"
+    - "{{ci_jenkins_ssh_public_key}}"
   lineinfile:
     path: /var/containers/git/keys/authorized_keys/git
-    line: "{{lookup('file', ci_local_ssh_public_key)}}"
+    line: "{{lookup('file', item)}}"
 
 - name: git docker container
   docker_container:

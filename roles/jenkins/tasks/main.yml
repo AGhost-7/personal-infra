@@ -1,0 +1,31 @@
+
+- name: create ansible user
+  user:
+    name: ansible
+    uid: 1000
+    groups:
+      - docker
+      - sudo
+
+- name: create jenkins directory
+  file:
+    state: directory
+    owner: 1000
+    path: /var/containers/jenkins/jenkins_home
+
+- name: find docker gid
+  register: docker_gid
+  shell: "cat /etc/group  | grep -E '^docker' | cut -d : -f 3"
+
+- name: jenkins docker image
+  docker_container:
+    name: jenkins
+    image: jenkins/jenkins:lts
+    groups:
+      - "{{docker_gid.stdout}}"
+    volumes:
+      - /var/containers/jenkins/jenkins_home:/var/jenkins_home
+      - /run/docker.sock:/run/docker.sock
+    ports:
+      - 0.0.0.0:8080:8080
+      - 0.0.0.0:50000:50000

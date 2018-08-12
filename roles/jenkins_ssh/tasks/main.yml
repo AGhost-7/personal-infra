@@ -1,0 +1,5 @@
+- name: add ssh key for jenkins to authorized keys
+  authorized_key:
+    user: root
+    key: "{{lookup('file', ci_jenkins_ssh_public_key)}}"
+

@@ -113,4 +113,11 @@ resource "digitalocean_record" "fingerboard" {
 	value = "jonathan-boudreau.com."
 }
 
+resource "digitalocean_record" "jenkins" {
+	domain = "jonathan-boudreau.com"
+	name = "jenkins"
+	type = "CNAME"
+	value = "jonathan-boudreau.com."
+}
+
 # }}}
