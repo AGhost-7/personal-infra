@@ -1,3 +1,10 @@
+- name: build git image
+  delegate_to: localhost
+  docker_image:
+    push: True
+    name: aghost7/git-server
+    path: images/git
+
 - name: ensure keys directory exists
   file:
     state: directory
