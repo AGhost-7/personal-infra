@@ -1,3 +1,9 @@
+- name: build jenkins image
+  delegate_to: localhost
+  docker_image:
+    push: True
+    name: aghost7/jenkins-ansible
+    path: images/jenkins
 
 - name: create ansible user
   user:
@@ -20,7 +26,7 @@
 - name: jenkins docker image
   docker_container:
     name: jenkins
-    image: jenkins/jenkins:lts
+    image: aghost7/jenkins-ansible
     groups:
       - "{{docker_gid.stdout}}"
     volumes:
