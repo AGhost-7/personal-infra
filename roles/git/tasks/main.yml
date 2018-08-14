@@ -1,6 +1,7 @@
 - name: build git image
   delegate_to: localhost
   docker_image:
+    force: True
     push: True
     name: aghost7/git-server
     path: images/git

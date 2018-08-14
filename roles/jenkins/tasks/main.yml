@@ -1,6 +1,7 @@
 - name: build jenkins image
   delegate_to: localhost
   docker_image:
+    force: True
     push: True
     name: aghost7/jenkins-ansible
     path: images/jenkins
