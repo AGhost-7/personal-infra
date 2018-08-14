@@ -31,7 +31,7 @@
 
 - name: ensure repos are initialized
   with_items: "{{git_repos}}"
-  register: git_repos
+  register: git_init
   changed_when: git_repos.stdout_lines|length > 0
   args:
     chdir: /var/containers/git/repos
@@ -40,3 +40,9 @@
       git init --bare "{{item}}".git
     fi
 
+- name: add post-receive hook
+  vars:
+    jenkins_build_url: "{{jenkins_base_url}}/buildWithParameters?token={{jenkins_fingerboard_build_token}}"
+  template:
+    src: templates/post-receive.j2
+    dest: "/var/containers/git/repos/fingerboard.git/hooks/post-receive"
