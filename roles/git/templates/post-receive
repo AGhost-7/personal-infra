@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-curl {{jenkins_build_url}}

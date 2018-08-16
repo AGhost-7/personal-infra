@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add --no-cache openssh git bash
+RUN apk add --no-cache openssh git bash curl
 
 RUN adduser -D -s /usr/bin/git-shell git && \
 	echo git:12345 | chpasswd
