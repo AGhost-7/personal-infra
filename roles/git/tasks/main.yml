@@ -26,8 +26,7 @@
     volumes:
       - /var/containers/git/repos:/repos
       - /var/containers/git/keys:/keys
-    ports:
-      - 0.0.0.0:22:22
+    network_mode: host
 
 - name: ensure repos are initialized
   become: True

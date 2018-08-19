@@ -97,6 +97,8 @@ resource "digitalocean_droplet" "ci" {
 
 	provisioner "remote-exec" {
 		inline = [
+			"ufw allow 2222",
+			"ufw reload",
 			"sed -i 's/Port 22/Port 2222/' /etc/ssh/sshd_config",
 			"systemctl restart ssh"
 		]

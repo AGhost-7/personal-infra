@@ -20,6 +20,13 @@
     owner: 1000
     path: /var/containers/jenkins/jenkins_home
 
+- name: open up jenkins port to load balancer
+  with_items: "{{groups['front']}}"
+  ufw:
+    rule: allow
+    from_ip: "{{item}}"
+    port: 8080
+
 - name: find docker gid
   register: docker_gid
   shell: "cat /etc/group  | grep -E '^docker' | cut -d : -f 3"
@@ -33,6 +40,4 @@
     volumes:
       - /var/containers/jenkins/jenkins_home:/var/jenkins_home
       - /run/docker.sock:/run/docker.sock
-    ports:
-      - 0.0.0.0:8080:8080
-      - 0.0.0.0:50000:50000
+    network_mode: host
