@@ -15,3 +15,7 @@
       - 127.0.0.1:9090:9090
     volumes:
       - /var/containers/prometheus/prometheus:/prometheus
+
+# TODO: Will need to leverage prometheus to check application status:
+# https://github.com/prometheus/blackbox_exporter
+# Alerts can be done from prometheus...

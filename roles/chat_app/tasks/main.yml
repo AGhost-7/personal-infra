@@ -1,0 +1,11 @@
+- name: add mongodb ip to hosts file
+  with_items: "{{groups['data']}}"
+  lineinfile:
+    path: /etc/hosts
+    line: "{{item}} mongo"
+
+- name: create app container
+  docker_container:
+    network_mode: host
+    name: chat_app
+    image: aghost7/ninja-chat

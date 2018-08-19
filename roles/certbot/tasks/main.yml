@@ -1,0 +1,22 @@
+
+- name: build image certbot
+  delegate_to: localhost
+  docker_image:
+    force: True
+    push: True
+    name: aghost7/certbot-dns-digitalocean
+    path: images/certbot
+
+- name: open up certbot port
+  ufw:
+    rule: allow
+    port: 6000
+
+- name: create container
+  docker_container:
+    name: certbot
+    image: aghost7/certbot-dns-digitalocean
+    network_mode: host
+    volumes:
+      - /var/containers/certbot/secrets:/etc/certbot/secrets
+      - /var/containers/_shared/letsencrypt:/etc/letsencrypt

@@ -1,0 +1,10 @@
+- name: bring up the database
+  hosts: data
+  roles:
+    - chat_mongo
+
+- name: bring up the app
+  hosts: front
+  roles:
+    - chat_app
+    - load_balancer

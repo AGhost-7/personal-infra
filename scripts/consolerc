@@ -1,12 +1,17 @@
 export PS1='ansible > '
 
 _ansible_run() {
-	terraform apply && \
-		ansible-playbook -i environments/inventory.py "$1".yml
+	ansible-playbook -i environments/inventory.py "$1".yml
 }
 
+ssh() {
+	./scripts/ssh.py "$1"
+}
+
+alias certbot='_ansible_run certbot'
 alias ci='_ansible_run ci'
 alias fingerboard='_ansible_run fingerboard'
 alias metrics='_ansible_run metrics'
+alias chat='_ansible_run chat'
 
 # vim: set ft=sh:
