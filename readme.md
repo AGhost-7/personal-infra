@@ -32,3 +32,20 @@ mkdir environments
 # symlink the dynamic inventory script
 ln -s '../ansible/contrib/inventory/digital_ocean.py' environments/inventory.py
 ```
+
+## Server Metrics
+Right now, I have a fairly simple setup for metrics. [Prometheus][prometheus]
+is listening on localhost, which I access using an ssh tunnel:
+
+```
+ssh -L 9090:localhost:9090 <address> -N
+```
+
+Also, since each server has a [netdata][netdata] daemon running, you can access
+more granular (up to the second) metrics on the target machine:
+```
+ssh -L 19999:localhost:19999 <address> -N
+```
+
+[netdata]: https://github.com/firehol/netdata
+[prometheus]: https://prometheus.io

@@ -1,0 +1,17 @@
+- name: build prometheus image
+  delegate_to: localhost
+  docker_image:
+    force: True
+    push: True
+    name: aghost7/prometheus-dns-netdata
+    path: images/prometheus
+
+- name: create prometheus container
+  docker_container:
+    name: prometheus
+    image: aghost7/prometheus-dns-netdata
+    ports:
+      # requires an ssh tunnel to access
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /var/containers/prometheus/prometheus:/prometheus

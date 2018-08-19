@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# little console for my shortcuts.
+
+exec bash --rcfile ./scripts/consolerc

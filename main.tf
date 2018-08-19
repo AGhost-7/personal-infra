@@ -11,10 +11,14 @@ variable "region" {
 }
 
 # https://github.com/AGhost-7/digitalocean-images
-# this should be the kubernetes image's ID returned in the output
-# when packer finishes building.
+# this should be the image's ID returned in the output when packer finishes
+# building.
 variable "image" {
 	default = "33359121"
+}
+
+variable "image_ufw" {
+	default = "37337493"
 }
 
 # }}}
@@ -61,9 +65,24 @@ resource "digitalocean_tag" "ci" {
 	name = "ci"
 }
 
+resource "digitalocean_tag" "data" {
+	name = "data"
+}
+
 # }}}
 
 # {{{ machines
+
+resource "digitalocean_droplet" "data" {
+	name = "data"
+	image = "${var.image_ufw}"
+	region = "${var.region}"
+	size = "${var.size}"
+	private_networking = true
+	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+	tags = ["${digitalocean_tag.default.id}", "data"]
+
+}
 
 resource "digitalocean_droplet" "ci" {
 	name = "ci"
@@ -73,6 +92,8 @@ resource "digitalocean_droplet" "ci" {
 	private_networking = true
 	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
 	tags = ["${digitalocean_tag.default.id}", "ci"]
+	# TODO: implement own backup solution
+	backups = true
 
 	provisioner "remote-exec" {
 		inline = [
@@ -81,11 +102,6 @@ resource "digitalocean_droplet" "ci" {
 		]
 	}
 
-	# add the host key
-	provisioner "local-exec" {
-		command =
-			"(ssh-keyscan -p 2222 ${digitalocean_droplet.ci.ipv4_address}; cat ~/.ssh/known_hosts) | sort -u > ~/.ssh/known_hosts"
-	}
 }
 
 # }}}
@@ -97,6 +113,13 @@ resource "digitalocean_record" "private_ci" {
 	name = "private"
 	type = "A"
 	value = "${digitalocean_droplet.ci.ipv4_address_private}"
+}
+
+resource "digitalocean_record" "private_data" {
+	domain = "jonathan-boudreau.com"
+	name = "private"
+	type = "A"
+	value = "${digitalocean_droplet.data.ipv4_address_private}"
 }
 
 resource "digitalocean_record" "git" {

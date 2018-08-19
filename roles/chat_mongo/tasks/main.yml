@@ -1,0 +1,27 @@
+- name: block access to db by default
+  with_items:
+    - 27017
+    - 27018
+    - 27019
+  ufw:
+    rule: deny
+    port: "{{item}}"
+  notify:
+    - reload firewall
+
+- name: open db port firewall only for front server
+  with_items: "{{groups['front']}}"
+  ufw:
+    rule: allow
+    from_ip: "{{item}}"
+    port: 27017
+  notify:
+    - reload firewall
+
+- name: create mongo container
+  docker_container:
+    name: chat_mongo
+    network_mode: host
+    volumes:
+      - /var/containers/chat_mongo/db:/data/db
+      - /var/containers/chat_mongo/config_db:/data/config_db

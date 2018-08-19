@@ -1,0 +1,5 @@
+- name: spin up everything for metrics
+  hosts: data
+  roles:
+    - prometheus
+    # TODO: ELK stack for logging, etc
