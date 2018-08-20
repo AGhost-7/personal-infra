@@ -1,5 +1,11 @@
+
+- name: configure logging
+  hosts: all
+  roles:
+    - docker
+
 - name: spin up everything for metrics
   hosts: data
   roles:
+    - elk
     - prometheus
-    # TODO: ELK stack for logging, etc

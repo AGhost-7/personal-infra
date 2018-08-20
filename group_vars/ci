@@ -4,3 +4,11 @@ git_repos:
   - fingerboard
   - rock-paper-assembly
   - personal-infra
+  - co.nvim
+  - parsy
+  - node-mailserver-http
+  - dyna-table
+  - stockpiler
+  - dynadoc
+  - model-ware
+  - pythian-challenge

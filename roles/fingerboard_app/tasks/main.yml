@@ -3,5 +3,6 @@
     name: fingerboard
     pull: True
     image: aghost7/fingerboard.js
+    restart_policy: unless-stopped
     ports:
       - 127.0.0.1:8000:8000

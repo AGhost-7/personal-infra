@@ -1,0 +1,2 @@
+ufw_default_to_ip: "{{ansible_eth1.ipv4.address}}"
+ufw_default_interface: "ansible_eth1"

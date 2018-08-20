@@ -49,3 +49,14 @@ ssh -L 19999:localhost:19999 <address> -N
 
 [netdata]: https://github.com/firehol/netdata
 [prometheus]: https://prometheus.io
+
+## Centralized Logging
+I am using the [ELK][elk] stack for this. I opted for the Open Source version,
+and I am currently binding on the localhost of the VM. To access kibana, just
+like the metrics, you need to create a tunnel:
+
+```bash
+ssh -L 5601:localhost:5601 <address> -N
+```
+
+[elk]: https://www.elastic.co/webinars/introduction-elk-stack

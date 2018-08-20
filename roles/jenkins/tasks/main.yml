@@ -41,3 +41,4 @@
       - /var/containers/jenkins/jenkins_home:/var/jenkins_home
       - /run/docker.sock:/run/docker.sock
     network_mode: host
+    restart_policy: unless-stopped

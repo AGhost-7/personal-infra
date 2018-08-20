@@ -17,6 +17,7 @@
     name: certbot
     image: aghost7/certbot-dns-digitalocean
     network_mode: host
+    restart_policy: unless-stopped
     volumes:
       - /var/containers/certbot/secrets:/etc/certbot/secrets
       - /var/containers/_shared/letsencrypt:/etc/letsencrypt

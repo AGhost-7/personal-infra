@@ -13,6 +13,7 @@
     image: mongo
     name: chat_mongo
     network_mode: host
+    restart_policy: unless-stopped
     volumes:
       - /var/containers/chat_mongo/db:/data/db
       - /var/containers/chat_mongo/config_db:/data/config_db

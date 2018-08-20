@@ -13,5 +13,6 @@ alias ci='_ansible_run ci'
 alias fingerboard='_ansible_run fingerboard'
 alias metrics='_ansible_run metrics'
 alias chat='_ansible_run chat'
+alias site='_ansible_run site'
 
 # vim: set ft=sh:

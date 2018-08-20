@@ -1,5 +1,5 @@
+- import_playbook: metrics.yml
 - import_playbook: certbot.yml
 - import_playbook: chat.yml
 - import_playbook: ci.yml
 - import_playbook: fingerboard.yml
-- import_playbook: metrics.yml

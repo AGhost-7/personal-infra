@@ -27,6 +27,7 @@
       - /var/containers/git/repos:/repos
       - /var/containers/git/keys:/keys
     network_mode: host
+    restart_policy: unless-stopped
 
 - name: ensure repos are initialized
   become: True

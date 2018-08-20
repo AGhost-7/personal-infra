@@ -1,0 +1,61 @@
+- name: open up port for logstash
+  ufw:
+    to_ip: "{{ufw_default_to_ip}}"
+    rule: allow
+    port: 5000
+
+- name: build logstash image
+  delegate_to: localhost
+  docker_image:
+    force: True
+    push: True
+    name: aghost7/logstash-syslog
+    path: images/logstash
+
+- name: create logstash container
+  docker_container:
+    # Guess I can't make logstash log itself eh...
+    log_driver: json-file
+    name: logstash
+    image: aghost7/logstash-syslog
+    network_mode: host
+    env:
+      ELASTICSEARCH_URL: http://localhost:9200
+
+- name: increase mapping size for elasticsearch
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
+
+- name: create elasticsearch data directory
+  file:
+    state: directory
+    path: /var/containers/elasticsearch/data
+    # required uid for elasticsearch to work correctly
+    group: 1000
+    owner: 1000
+
+- name: create elasticsearch container for logging
+  docker_container:
+    log_driver: json-file
+    name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.2
+    network_mode: host
+    volumes:
+      - /var/containers/elasticsearch/data:/usr/share/elasticsearch/data
+    env:
+      ES_JAVA_OPTS: '-Xms200m -Xmx200m -XX:+UseCompressedOops -XX:MaxHeapFreeRatio=20 -XX:MinHeapFreeRatio=10'
+      indices.fielddata.cache.size: 15%
+      http.cors.allow-origin: '/.*/'
+      http.cors.enabled: 'true'
+      http.cors.allow-headers: 'X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization'
+      http.cors.allow-credentials: 'true'
+
+- name: bring up kibana
+  docker_container:
+    log_driver: json-file
+    name: kibana
+    image: docker.elastic.co/kibana/kibana-oss:6.2.3
+    network_mode: host
+    env:
+      ELASTICSEARCH_URL: http://localhost:9200
