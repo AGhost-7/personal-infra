@@ -1,0 +1,2 @@
+- name: reload logstash
+  command: docker kill --signal=HUP logstash

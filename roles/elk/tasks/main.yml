@@ -4,23 +4,27 @@
     rule: allow
     port: 5000
 
-- name: build logstash image
-  delegate_to: localhost
-  docker_image:
-    force: True
-    push: True
-    name: aghost7/logstash-syslog
-    path: images/logstash
+- name: logstash directory
+  file:
+    state: directory
+    path: /var/containers/logstash/pipeline
+
+- name: generate pipeline config
+  template:
+    src: logstash.conf.j2
+    dest: /var/containers/logstash/pipeline/logstash.conf
+  notify:
+    - "reload logstash"
 
 - name: create logstash container
   docker_container:
     # Guess I can't make logstash log itself eh...
     log_driver: json-file
     name: logstash
-    image: aghost7/logstash-syslog
+    image: docker.elastic.co/logstash/logstash-oss:6.3.2
     network_mode: host
-    env:
-      ELASTICSEARCH_URL: http://localhost:9200
+    volumes:
+      - /var/containers/logstash/pipeline:/usr/share/logstash/pipeline
 
 - name: increase mapping size for elasticsearch
   sysctl:
