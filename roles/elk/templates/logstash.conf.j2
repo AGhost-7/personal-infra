@@ -7,11 +7,11 @@
 # https://grokdebug.herokuapp.com/
 
 input {
-  syslog {
-    port => 5000
-    id => "docker"
-    grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{WORD:docker_container}\[%{POSINT:pid}\]: %{GREEDYDATA:syslog_message}"
-  }
+	syslog {
+		port => 5000
+			id => "docker"
+			grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{WORD:docker_container}\[%{POSINT:pid}\]: %{GREEDYDATA:syslog_message}"
+	}
 }
 
 filter {
@@ -28,7 +28,7 @@ output {
 	elasticsearch {
 		hosts => ["http://localhost:9200"]
 	}
-  stdout {
+	stdout {
 		codec => rubydebug
 	}
 }
