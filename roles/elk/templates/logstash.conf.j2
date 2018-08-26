@@ -12,6 +12,16 @@ input {
   }
 }
 
+filter {
+	if [docker_container] == "load_balancer" {
+		grok {
+			match => {
+				"syslog_message" => '%{IP:nginx_ip} - - \[%{HTTPDATE:nginx_timestamp}\] "%{WORD:nginx_method} %{URIPATH:nginx_path} HTTP/%{BASE10NUM:nginx_http_version}" %{POSINT:nginx_status_code} %{POSINT:nginx_body_bytes} "%{URI:nginx_referrer}"'
+			}
+		}
+	}
+}
+
 output {
 	elasticsearch {
 		hosts => ["http://localhost:9200"]
