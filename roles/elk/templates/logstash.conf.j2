@@ -8,11 +8,13 @@
 
 input {
 	syslog {
+		host => "{{logstash_host}}"
 		port => 5000
-			id => "docker"
-			grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{WORD:docker_container}\[%{POSINT:pid}\]: %{GREEDYDATA:syslog_message}"
+		id => "docker"
+		grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{WORD:docker_container}\[%{POSINT:pid}\]: %{GREEDYDATA:syslog_message}"
 	}
 	syslog {
+		host => "{{logstash_host}}"
 		port => 5002
 		id => "journald"
 		grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{WORD:journald_hostname} %{WORD:journald_unit}(\[%{POSINT:pid}\]|): %{GREEDYDATA:syslog_message}"
