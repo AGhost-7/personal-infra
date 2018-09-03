@@ -12,13 +12,18 @@ input {
 			id => "docker"
 			grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{WORD:docker_container}\[%{POSINT:pid}\]: %{GREEDYDATA:syslog_message}"
 	}
+	syslog {
+		port => 5002
+		id => "journald"
+		grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{WORD:journald_hostname} %{WORD:journald_unit}(\[%{POSINT:pid}\]|): %{GREEDYDATA:syslog_message}"
+	}
 }
 
 filter {
 	if [docker_container] == "load_balancer" {
 		grok {
 			match => {
-				"syslog_message" => '%{IP:nginx_ip} - - \[%{HTTPDATE:nginx_timestamp}\] "%{WORD:nginx_method} %{URIPATH:nginx_path} HTTP/%{BASE10NUM:nginx_http_version}" %{POSINT:nginx_status_code} %{POSINT:nginx_body_bytes} "%{URI:nginx_referrer}"'
+				"syslog_message" => '%{IP:nginx_ip} - - \[%{HTTPDATE:nginx_timestamp}\] "%{WORD:nginx_method} %{URIPATH:nginx_path} HTTP/%{BASE10NUM:nginx_http_version}" %{POSINT:nginx_status_code} %{POSINT:nginx_body_bytes} "(%{URI:nginx_referrer}|-)"'
 			}
 		}
 	}

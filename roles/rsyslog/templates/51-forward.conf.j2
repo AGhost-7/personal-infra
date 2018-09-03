@@ -1,0 +1,2 @@
+# forward all logs to remote server through tcp
+*.* @@{{hostvars[groups['data'][0]][ufw_default_interface].ipv4.address}}:5002

@@ -1,8 +1,11 @@
 - name: open up port for logstash
+  with_items:
+    - 5000
+    - 5001
   ufw:
     to_ip: "{{ufw_default_to_ip}}"
     rule: allow
-    port: 5000
+    port: "{{item}}"
 
 - name: logstash directory
   file:

@@ -3,6 +3,7 @@
   hosts: all
   roles:
     - docker
+    - rsyslog
 
 - name: spin up everything for metrics
   hosts: data
