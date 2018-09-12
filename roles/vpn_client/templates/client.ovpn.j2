@@ -1,0 +1,74 @@
+
+# Specify that we are a client and that we
+# will be pulling certain config file directives
+# from the server.
+client
+
+# Use the same setting as you are using on
+# the server.
+# On most systems, the VPN will not function
+# unless you partially or fully disable
+# the firewall for the TUN/TAP interface.
+;dev tap
+dev tun
+
+proto udp
+
+remote vpn.jonathan-boudreau.com 1194
+
+# Keep trying indefinitely to resolve the
+# host name of the OpenVPN server.  Very useful
+# on machines which are not permanently connected
+# to the internet such as laptops.
+resolv-retry infinite
+
+# Most clients don't need to bind to
+# a specific local port number.
+nobind
+
+# Downgrade privileges after initialization
+user nobody
+group nogroup
+
+# Try to preserve some state across restarts.
+persist-key
+persist-tun
+
+# Verify server certificate by checking that the
+# certicate has the correct key usage set.
+remote-cert-tls server
+
+# Select a cryptographic cipher.
+# If the cipher option is used on the server
+# then you must also specify it here.
+cipher AES-128-CBC
+
+# Authentication hash
+auth SHA256
+
+# Enable compression on the VPN link.
+# Don't enable this unless it is also
+# enabled in the server config file.
+comp-lzo
+
+# Set log file verbosity.
+verb 3
+
+# Shenanigans
+key-direction 1
+
+<ca>
+{{vpn_client_ca.stdout}}
+</ca>
+
+<cert>
+{{vpn_client_cert.stdout}}
+</cert>
+
+<key>
+{{vpn_client_key.stdout}}
+</key>
+
+<tls-auth>
+{{vpn_client_tls_auth.stdout}}
+</tls-auth>
