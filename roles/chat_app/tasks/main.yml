@@ -10,3 +10,5 @@
     restart_policy: unless-stopped
     name: chat_app
     image: aghost7/ninja-chat
+    env:
+      JAVA_OPTS: '-XX:+UseCompressedOops -Xms50m -Xmx50m'
