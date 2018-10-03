@@ -11,7 +11,7 @@
 - name: create mongo container
   docker_container:
     image: mongo
-    name: chat_mongo
+    name: mongo
     network_mode: host
     restart_policy: unless-stopped
     volumes:

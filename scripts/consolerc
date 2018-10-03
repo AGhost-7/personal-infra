@@ -15,5 +15,6 @@ alias metrics='_ansible_run metrics'
 alias chat='_ansible_run chat'
 alias site='_ansible_run site'
 alias vpn='_ansible_run vpn'
+alias jokemongo='_ansible_run jokemongo'
 
 # vim: set ft=sh:

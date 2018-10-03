@@ -1,0 +1,9 @@
+- name: create joke container
+  docker_container:
+    name: jokemongo
+    image: aghost7/jokemongo
+    network_mode: host
+    restart_policy: unless-stopped
+    env:
+      jokemongo.db.url: 'mongodb://mongo/jokemongo'
+

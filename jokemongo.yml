@@ -3,8 +3,8 @@
   roles:
     - mongo
 
-- name: bring up the app
+- name: spin up jokes app
   hosts: front
   roles:
-    - chat_app
     - load_balancer
+    - jokemongo

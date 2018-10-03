@@ -24,6 +24,7 @@
     - fingerboard
     - chat
     - jenkins
+    - jokes
   template:
     src: "templates/{{item}}.nginx.conf.j2"
     dest: "/var/containers/load_balancer/conf.d/{{item}}.nginx.conf"

@@ -1,0 +1,22 @@
+
+server {
+	listen 80;
+	server_name jokes.jonathan-boudreau.com;
+
+	location / {
+		proxy_pass http://localhost:8066;
+	}
+}
+
+server {
+	listen 443 ssl;
+
+	server_name jokes.jonathan-boudreau.com;
+	ssl_certificate /etc/letsencrypt/live/jonathan-boudreau.com/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/jonathan-boudreau.com/privkey.pem;
+
+	location / {
+		proxy_pass http://localhost:8066;
+	}
+
+}
