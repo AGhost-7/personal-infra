@@ -1,6 +1,7 @@
 - name: build jenkins image
   delegate_to: localhost
   docker_image:
+    pull: True
     force: True
     push: True
     name: aghost7/jenkins-ansible
@@ -33,6 +34,8 @@
 
 - name: jenkins docker image
   docker_container:
+    pull: True
+    restart_policy: on-failure
     name: jenkins
     image: aghost7/jenkins-ansible
     groups:
@@ -41,4 +44,3 @@
       - /var/containers/jenkins/jenkins_home:/var/jenkins_home
       - /run/docker.sock:/run/docker.sock
     network_mode: host
-    restart_policy: unless-stopped
