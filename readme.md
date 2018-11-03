@@ -60,7 +60,3 @@ ssh -L 5601:localhost:5601 <address> -N
 ```
 
 [elk]: https://www.elastic.co/webinars/introduction-elk-stack
-
-## VPN
-To use the VPN, you will need to install an openvpn client. More details to
-come.

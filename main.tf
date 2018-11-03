@@ -69,10 +69,6 @@ resource "digitalocean_tag" "data" {
 	name = "data"
 }
 
-resource "digitalocean_tag" "vpn" {
-	name = "vpn"
-}
-
 # }}}
 
 # {{{ machines
@@ -108,26 +104,9 @@ resource "digitalocean_droplet" "ci" {
 	}
 }
 
-resource "digitalocean_droplet" "vpn" {
-	name = "vpn"
-	image = "${var.image_ufw}"
-	region = "${var.region}"
-	size = "${var.size}"
-	private_networking = true
-	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
-	tags = ["${digitalocean_tag.default.id}", "${digitalocean_tag.vpn.id}"]
-}
-
 # }}}
 
 # {{{ dns
-
-resource "digitalocean_record" "private_vpn" {
-	domain = "jonathan-boudreau.com"
-	name = "private"
-	type = "A"
-	value = "${digitalocean_droplet.vpn.ipv4_address_private}"
-}
 
 resource "digitalocean_record" "private_ci" {
 	domain = "jonathan-boudreau.com"
@@ -141,13 +120,6 @@ resource "digitalocean_record" "private_data" {
 	name = "private"
 	type = "A"
 	value = "${digitalocean_droplet.data.ipv4_address_private}"
-}
-
-resource "digitalocean_record" "vpn" {
-	domain = "jonathan-boudreau.com"
-	name = "vpn"
-	type = "A"
-	value = "${digitalocean_droplet.vpn.ipv4_address}"
 }
 
 resource "digitalocean_record" "git" {

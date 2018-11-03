@@ -1,4 +1,0 @@
-- name: bring up vpn
-  hosts: vpn
-  roles:
-    - vpn
