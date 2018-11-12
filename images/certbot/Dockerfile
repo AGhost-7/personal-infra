@@ -26,6 +26,7 @@ RUN apk add --no-cache bash
 COPY ./crontab /etc/crontab
 COPY ./renew-hook.sh /renew-hook.sh
 
+RUN chmod +x /renew-hook.sh
 # }}}
 
 VOLUME /etc/certbot/secrets
