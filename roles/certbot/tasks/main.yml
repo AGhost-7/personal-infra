@@ -14,6 +14,7 @@
 
 - name: create container
   docker_container:
+    pull: True
     name: certbot
     image: aghost7/certbot-dns-digitalocean
     network_mode: host
