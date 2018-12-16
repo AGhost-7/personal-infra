@@ -5,8 +5,15 @@
     - docker
     - rsyslog
 
-- name: spin up everything for metrics
+- name: spin up elasticsearch
+  hosts: es
+  roles:
+    - elasticsearch
+
+- name: spin up everything else for metrics
   hosts: data
   roles:
-    - elk
+    - logstash
+    - kibana
     - prometheus
+    - curator

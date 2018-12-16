@@ -1,0 +1,33 @@
+- name: build curator image
+  delegate_to: localhost
+  docker_image:
+    force: True
+    push: True
+    name: aghost7/curator
+    path: images/curator
+
+- name: create configuration directory
+  file:
+    state: directory
+    path: /var/containers/curator/curator
+
+- name: generate configuration
+  template:
+    src: config.yml.j2
+    dest: /var/containers/curator/curator/config.yml
+
+- name: copy actions file
+  copy:
+    src: actions.yml
+    dest: /var/containers/curator/curator/actions.yml
+
+- name: create container
+  docker_container:
+    log_driver: json-file
+    image: aghost7/curator
+    network_mode: host
+    restart_policy: unless-stopped
+    pull: True
+    name: curator
+    volumes:
+      - /var/containers/curator/curator/:/etc/curator

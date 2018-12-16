@@ -69,6 +69,10 @@ resource "digitalocean_tag" "data" {
 	name = "data"
 }
 
+resource "digitalocean_tag" "es" {
+	name = "es"
+}
+
 # }}}
 
 # {{{ machines
@@ -104,9 +108,26 @@ resource "digitalocean_droplet" "ci" {
 	}
 }
 
+resource "digitalocean_droplet" "es" {
+	name = "es"
+	image = "${var.image}"
+	region = "${var.region}"
+	size = "${var.size}"
+	private_networking = true
+	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+	tags = ["${digitalocean_tag.default.id}", "es"]
+}
+
 # }}}
 
 # {{{ dns
+
+resource "digitalocean_record" "private_es" {
+	domain = "jonathan-boudreau.com"
+	name = "private"
+	type = "A"
+	value = "${digitalocean_droplet.ci.ipv4_address_private}"
+}
 
 resource "digitalocean_record" "private_ci" {
 	domain = "jonathan-boudreau.com"

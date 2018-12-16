@@ -9,6 +9,9 @@
 - name: create prometheus container
   docker_container:
     name: prometheus
+    # Use json-file since we need prometheus to monitor the elasic logger. They
+    # shouldn't be interdependent in case elastic fails.
+    log_driver: json-file
     image: aghost7/prometheus-dns-netdata
     ports:
       # requires an ssh tunnel to access
