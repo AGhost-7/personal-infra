@@ -95,6 +95,7 @@ resource "digitalocean_droplet" "ci" {
 	private_networking = true
 	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
 	tags = ["${digitalocean_tag.default.id}", "ci"]
+
 	# TODO: implement own backup solution
 	backups = true
 
@@ -124,23 +125,70 @@ resource "digitalocean_droplet" "es" {
 
 resource "digitalocean_record" "private_es" {
 	domain = "jonathan-boudreau.com"
-	name = "private"
+	name = "es.private"
 	type = "A"
-	value = "${digitalocean_droplet.ci.ipv4_address_private}"
+	value = "${digitalocean_droplet.es.ipv4_address_private}"
 }
 
 resource "digitalocean_record" "private_ci" {
 	domain = "jonathan-boudreau.com"
-	name = "private"
+	name = "ci.private"
 	type = "A"
 	value = "${digitalocean_droplet.ci.ipv4_address_private}"
 }
 
 resource "digitalocean_record" "private_data" {
 	domain = "jonathan-boudreau.com"
-	name = "private"
+	name = "data.private"
 	type = "A"
 	value = "${digitalocean_droplet.data.ipv4_address_private}"
+}
+
+resource "digitalocean_record" "private_front" {
+	domain = "jonathan-boudreau.com"
+	name = "front.private"
+	type = "A"
+	value = "138.197.153.75"
+}
+
+resource "digitalocean_record" "metrics_es" {
+	domain = "jonathan-boudreau.com"
+	name = "_metrics._tcp"
+	type = "SRV"
+	port = 19999
+	weight = 100
+	priority = 100
+	value = "es.private"
+}
+
+resource "digitalocean_record" "metrics_ci" {
+	domain = "jonathan-boudreau.com"
+	name = "_metrics._tcp"
+	type = "SRV"
+	port = 19999
+	weight = 100
+	priority = 100
+	value = "ci.private"
+}
+
+resource "digitalocean_record" "metrics_data" {
+	domain = "jonathan-boudreau.com"
+	name = "_metrics._tcp"
+	type = "SRV"
+	port = 19999
+	weight = 100
+	priority = 100
+	value = "data.private"
+}
+
+resource "digitalocean_record" "metrics_front" {
+	domain = "jonathan-boudreau.com"
+	name = "_metrics._tcp"
+	type = "SRV"
+	port = 19999
+	weight = 100
+	priority = 100
+	value = "front.private"
 }
 
 resource "digitalocean_record" "git" {

@@ -16,6 +16,4 @@ scrape_configs:
     # when I'm done with metrics stuff. This isn't optimal.
     dns_sd_configs:
     - names:
-      - 'private.jonathan-boudreau.com'
-      type: 'A'
-      port: 19999
+      - '_metrics._tcp.jonathan-boudreau.com'
