@@ -12,8 +12,9 @@ scrape_configs:
     params:
       format: [prometheus]
     honor_labels: true
-    # For now, use dns for service discovery. Will move over to kubernetes
-    # when I'm done with metrics stuff. This isn't optimal.
-    dns_sd_configs:
-    - names:
-      - '_metrics._tcp.jonathan-boudreau.com'
+    static_configs:
+    {% for host in groups['all'] %}
+    - targets: ['{{hostvars[host][ufw_default_interface].ipv4.address}}']
+      labels:
+        hostname: '{{hostvars[host].ansible_hostname}}'
+    {% endfor %}

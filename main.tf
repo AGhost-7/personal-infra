@@ -151,46 +151,6 @@ resource "digitalocean_record" "private_front" {
 	value = "138.197.153.75"
 }
 
-resource "digitalocean_record" "metrics_es" {
-	domain = "jonathan-boudreau.com"
-	name = "_metrics._tcp"
-	type = "SRV"
-	port = 19999
-	weight = 100
-	priority = 100
-	value = "es.private"
-}
-
-resource "digitalocean_record" "metrics_ci" {
-	domain = "jonathan-boudreau.com"
-	name = "_metrics._tcp"
-	type = "SRV"
-	port = 19999
-	weight = 100
-	priority = 100
-	value = "ci.private"
-}
-
-resource "digitalocean_record" "metrics_data" {
-	domain = "jonathan-boudreau.com"
-	name = "_metrics._tcp"
-	type = "SRV"
-	port = 19999
-	weight = 100
-	priority = 100
-	value = "data.private"
-}
-
-resource "digitalocean_record" "metrics_front" {
-	domain = "jonathan-boudreau.com"
-	name = "_metrics._tcp"
-	type = "SRV"
-	port = 19999
-	weight = 100
-	priority = 100
-	value = "front.private"
-}
-
 resource "digitalocean_record" "git" {
 	domain = "jonathan-boudreau.com"
 	name = "git"
