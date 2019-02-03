@@ -13,8 +13,8 @@ scrape_configs:
       format: [prometheus]
     honor_labels: true
     static_configs:
-    {% for host in groups['all'] %}
+{% for host in groups['all'] %}
     - targets: ['{{hostvars[host][ufw_default_interface].ipv4.address}}']
       labels:
         hostname: '{{hostvars[host].ansible_hostname}}'
-    {% endfor %}
+{% endfor %}
