@@ -14,7 +14,7 @@ scrape_configs:
     honor_labels: true
     static_configs:
 {% for host in groups['all'] %}
-    - targets: ['{{hostvars[host][ufw_default_interface].ipv4.address}}']
+    - targets: ['{{hostvars[host][ufw_default_interface].ipv4.address}}:19999']
       labels:
         hostname: '{{hostvars[host].ansible_hostname}}'
 {% endfor %}
