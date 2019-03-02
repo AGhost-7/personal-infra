@@ -20,5 +20,6 @@
     network_mode: host
     restart_policy: unless-stopped
     volumes:
+      - /run/docker.sock:/var/run/docker.sock
       - /var/containers/certbot/secrets:/etc/certbot/secrets
       - /var/containers/_shared/letsencrypt:/etc/letsencrypt
