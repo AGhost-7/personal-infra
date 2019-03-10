@@ -40,6 +40,8 @@
     image: aghost7/jenkins-ansible
     groups:
       - "{{docker_gid.stdout}}"
+    env:
+      DOCKER_GID: "{{docker_gid.stdout}}"
     volumes:
       - /var/containers/jenkins/jenkins_home:/var/jenkins_home
       - /run/docker.sock:/run/docker.sock
