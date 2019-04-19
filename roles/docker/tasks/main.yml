@@ -5,3 +5,11 @@
     dest: /etc/docker/daemon.json
   notify:
     - "restart docker"
+
+- name: set the gc cron
+  copy:
+    content: |
+      #!/usr/bin/env bash
+      /usr/local/bin/docker-gc
+    dest: /etc/cron.hourly/docker-gc
+    mode: 0755
