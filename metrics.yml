@@ -1,6 +1,7 @@
-- name: configure logging
+- name: configure logging and netdata
   hosts: all
   roles:
+    - netdata
     - docker
     - rsyslog
 

@@ -3,4 +3,4 @@
 - import_playbook: chat.yml
 - import_playbook: ci.yml
 - import_playbook: fingerboard.yml
-- import_playbook: jokes.yml
+- import_playbook: jokemongo.yml
