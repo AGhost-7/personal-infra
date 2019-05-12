@@ -11,6 +11,15 @@
     state: touch
     path: /var/containers/prometheus/config/prometheus.yml
 
+- name: open up firewall
+  ufw:
+    rule: allow
+    direction: in
+    interface: lo
+    port: 9090
+  notify:
+    - "reload firewall"
+
 - name: create prometheus container
   docker_container:
     name: prometheus
@@ -20,9 +29,7 @@
     log_driver: json-file
     image: prom/prometheus
     command: "--config.file=/etc/prometheus/config/prometheus.yml"
-    ports:
-      # requires an ssh tunnel to access
-      - 127.0.0.1:9090:9090
+    network_mode: host
     restart_policy: unless-stopped
     volumes:
       - /var/containers/prometheus/prometheus:/prometheus
@@ -38,6 +45,7 @@
 - name: bring up the blackbox exporter
   docker_container:
     name: blackbox_exporter
+    log_driver: json-file
     image: prom/blackbox-exporter:v0.14.0
     network_mode: host
     restart_policy: always
@@ -45,6 +53,12 @@
       - /var/containers/blackbox_exporter/config:/config
     command: "--config.file=/config/blackbox.yml"
 
+- name: generate blackbox config
+  template:
+    src: blackbox.yml.j2
+    dest: /var/containers/blackbox_exporter/config/blackbox.yml
+  notify:
+    - "reload blackbox_exporter"
 # TODO: Will need to leverage prometheus to check application status:
 # https://github.com/prometheus/blackbox_exporter
 # Alerts can be done from prometheus...
