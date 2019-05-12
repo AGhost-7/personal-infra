@@ -27,7 +27,7 @@ tunnel = Popen([
 ])
 
 try:
-    print('Prometheus available on port 5601')
+    print('Prometheus available on port 9090')
     tunnel.wait()
 except KeyboardInterrupt:
     tunnel.kill()

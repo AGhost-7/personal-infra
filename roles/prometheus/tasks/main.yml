@@ -1,7 +1,10 @@
 - name: create config directory
+  loop:
+    - prometheus
+    - blackbox_exporter
   file:
     state: directory
-    path: /var/containers/prometheus/config
+    path: /var/containers/{{item}}/config
 
 - name: ensure the config file exists
   file:
@@ -31,6 +34,16 @@
     dest: /var/containers/prometheus/config/prometheus.yml
   notify:
     - "reload prometheus"
+
+- name: bring up the blackbox exporter
+  docker_container:
+    name: blackbox_exporter
+    image: prom/blackbox-exporter:v0.14.0
+    network_mode: host
+    restart_policy: always
+    volumes:
+      - /var/containers/blackbox_exporter/config:/config
+    command: "--config.file=/config/blackbox.yml"
 
 # TODO: Will need to leverage prometheus to check application status:
 # https://github.com/prometheus/blackbox_exporter

@@ -1,2 +1,5 @@
 - name: reload prometheus
   command: docker kill --signal=HUP prometheus
+
+- name: reload blackbox_exporter
+  command: docker kill --signal=HUP blackbox_exporter
