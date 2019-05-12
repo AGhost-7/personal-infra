@@ -179,4 +179,33 @@ resource "digitalocean_record" "jokes" {
 	value = "jonathan-boudreau.com."
 }
 
+resource "digitalocean_record" "alerts" {
+  domain = "jonathan-boudreau.com"
+  name = "alerts"
+  type = "TXT"
+  value = "v=spf1 include:mailgun.org ~all"
+}
+
+resource "digitalocean_record" "alerts_domainkey" {
+  domain = "jonathan-boudreau.com"
+  name = "smtp._domainkey.alerts"
+  type = "TXT"
+  value = "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbOF+x85W0I7UIHR23K+YuwmwRHj3nBAKfmUqdBgZXjLUvokQSSd9Yb4Qq8hWBfQbgvTU90+P9LE0anA1GAK/VdHn2icun8xtzylGwxq6PRrdJJ/JI1WhJmvecvNjvqulhH1H9aW3ym2hao56ge9kjAN4eqVHlgBzUxtO564SyoQIDAQAB"
+}
+
+resource "digitalocean_record" "alerts_mxa" {
+  domain = "jonathan-boudreau.com"
+  type = "MX"
+  name = "alerts"
+  value = "mxa.mailgun.org."
+  priority = 10
+}
+
+resource "digitalocean_record" "alerts_mxb" {
+  domain = "jonathan-boudreau.com"
+  type = "MX"
+  name = "alerts"
+  value = "mxb.mailgun.org."
+  priority = 10
+}
 # }}}
