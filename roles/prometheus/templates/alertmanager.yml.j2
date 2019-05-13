@@ -1,0 +1,19 @@
+global:
+  smtp_from: noreply@alerts.jonathan-boudreau.com
+  smtp_smarthost: "smtp.mailgun.org:587"
+  smtp_auth_username: {{prometheus_mail_username}}
+  smtp_auth_password: {{prometheus_mail_password}}
+
+templates:
+  - '/templates/*.tmpl'
+
+route:
+  receiver: 'default'
+
+receivers:
+- name: 'default'
+  email_configs:
+  - to: "{{prometheus_mail_recipient}}"
+    from: "noreply@alerts.jonathan-boudreau.com"
+
+# vim: set expandtab:

@@ -2,14 +2,20 @@
   loop:
     - prometheus
     - blackbox_exporter
+    - alertmanager
   file:
     state: directory
     path: /var/containers/{{item}}/config
 
-- name: ensure the config file exists
+- name: ensure prometheus config file exists
   file:
     state: touch
     path: /var/containers/prometheus/config/prometheus.yml
+
+- name: create rules directory
+  file:
+    state: directory
+    path: /var/containers/prometheus/rules
 
 - name: open up firewall
   ufw:
@@ -34,6 +40,7 @@
     volumes:
       - /var/containers/prometheus/prometheus:/prometheus
       - /var/containers/prometheus/config:/etc/prometheus/config
+      - /var/containers/prometheus/rules:/etc/prometheus/rules
 
 - name: generate prometheus config
   template:
@@ -41,6 +48,37 @@
     dest: /var/containers/prometheus/config/prometheus.yml
   notify:
     - "reload prometheus"
+
+- name: copy prometheus rules config
+  copy:
+    src: file/rules.yml
+    dest: /var/containers/prometheus/rules/rules.yml
+  notify:
+    - "reload prometheus"
+
+- name: create alertmanager container
+  docker_container:
+    name: alertmanager
+    image: prom/alertmanager:v0.17.0
+    log_driver: json-file
+    network_mode: host
+    restart_policy: always
+    volumes:
+      - /var/containers/alertmanager/config:/config
+      - /var/containers/alertmanager/templates:/templates
+    command: "--config.file=/config/alertmanager.yml"
+
+- name: generate alertmanager config
+  template:
+    src: alertmanager.yml.j2
+    dest: /var/containers/alertmanager/config/alertmanager.yml
+  notify:
+    - "reload alertmanager"
+
+- name: create email template directory
+  file:
+    state: directory
+    path: /var/containers/alertmanager/templates
 
 - name: bring up the blackbox exporter
   docker_container:
