@@ -24,7 +24,7 @@
     restart_policy: unless-stopped
     log_driver: json-file
     name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.2
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.4
     network_mode: host
     volumes:
       - /var/containers/elasticsearch/data:/usr/share/elasticsearch/data

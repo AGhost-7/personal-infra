@@ -3,7 +3,7 @@
   docker_container:
     log_driver: json-file
     name: kibana
-    image: docker.elastic.co/kibana/kibana-oss:6.2.3
+    image: docker.elastic.co/kibana/kibana-oss:6.8.4
     network_mode: host
     env:
       ELASTICSEARCH_URL: "http://{{hostvars[groups['es'][0]][ufw_default_interface].ipv4.address}}:9200"

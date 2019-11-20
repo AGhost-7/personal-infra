@@ -25,7 +25,7 @@
     # Guess I can't make logstash log itself eh...
     log_driver: json-file
     name: logstash
-    image: docker.elastic.co/logstash/logstash-oss:6.3.2
+    image: docker.elastic.co/logstash/logstash-oss:6.8.4
     network_mode: host
     volumes:
       - /var/containers/logstash/pipeline:/usr/share/logstash/pipeline
