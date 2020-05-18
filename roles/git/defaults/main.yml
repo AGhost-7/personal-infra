@@ -1,3 +1,0 @@
-ci_local_ssh_public_key: ~/.ssh/id_rsa.pub
-ansible_ssh_port: 2222
-jenkins_base_url: https://jenkins.jonathan-boudreau.com

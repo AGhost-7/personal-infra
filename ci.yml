@@ -2,7 +2,6 @@
 - name: setup ci server
   hosts: ci
   roles:
-    - git
     - jenkins
 
 - name: load balancer

@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-if cat - | grep -q "refs/heads/master"; then
-	curl -s -u {{jenkins_bot_user_name}}:{{jenkins_bot_token}} \
-		{{jenkins_base_url}}/job/{{jenkins_build_name}}/build?token={{jenkins_build_token}}
-fi
-
-# vim:set ft=j2:

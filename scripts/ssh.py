@@ -8,7 +8,7 @@ from sys import argv
 from os import execlp, environ
 import requests
 
-token = environ['DO_TOKEN']
+token = environ['DO_API_TOKEN']
 
 headers = {
     'Authorization': 'Bearer {}'.format(token),
