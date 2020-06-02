@@ -4,7 +4,7 @@ from subprocess import Popen
 import requests
 from os import environ
 
-token = environ['DO_TOKEN']
+token = environ['DO_API_TOKEN']
 
 headers = {
     'Authorization': 'Bearer {}'.format(token),
