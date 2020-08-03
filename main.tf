@@ -46,7 +46,7 @@ variable "ssh_pub_key" {
 
 resource "digitalocean_ssh_key" "default" {
 	name = "${var.namespace}-default-key"
-	public_key = "${file(var.ssh_pub_key)}"
+	public_key = file(var.ssh_pub_key)
 }
 
 # }}}
@@ -54,7 +54,7 @@ resource "digitalocean_ssh_key" "default" {
 # {{{ tags
 
 resource "digitalocean_tag" "default" {
-	name = "${var.namespace}"
+	name = var.namespace
 }
 
 resource "digitalocean_tag" "ci" {
@@ -75,22 +75,22 @@ resource "digitalocean_tag" "es" {
 
 resource "digitalocean_droplet" "data" {
 	name = "data"
-	image = "${var.image_ufw}"
-	region = "${var.region}"
-	size = "${var.size}"
+	image = var.image_ufw
+	region = var.region
+	size = var.size
 	private_networking = true
-	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
-	tags = ["${digitalocean_tag.default.id}", "data"]
+	ssh_keys = [digitalocean_ssh_key.default.id]
+	tags = [digitalocean_tag.default.id, "data"]
 }
 
 resource "digitalocean_droplet" "ci" {
 	name = "ci"
-	image = "${var.image}"
-	region = "${var.region}"
-	size = "${var.size}"
+	image = var.image
+	region = var.region
+	size = var.size
 	private_networking = true
-	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
-	tags = ["${digitalocean_tag.default.id}", "ci"]
+	ssh_keys = [digitalocean_ssh_key.default.id]
+	tags = [digitalocean_tag.default.id, "ci"]
 
 	# TODO: implement own backup solution
 	backups = true
@@ -107,12 +107,12 @@ resource "digitalocean_droplet" "ci" {
 
 resource "digitalocean_droplet" "es" {
 	name = "es"
-	image = "${var.image}"
-	region = "${var.region}"
-	size = "${var.size}"
+	image = var.image
+	region = var.region
+	size = var.size
 	private_networking = true
-	ssh_keys = ["${digitalocean_ssh_key.default.id}"]
-	tags = ["${digitalocean_tag.default.id}", "es"]
+	ssh_keys = [digitalocean_ssh_key.default.id]
+	tags = [digitalocean_tag.default.id, "es"]
 }
 
 # }}}
@@ -123,21 +123,21 @@ resource "digitalocean_record" "private_es" {
 	domain = "jonathan-boudreau.com"
 	name = "es.private"
 	type = "A"
-	value = "${digitalocean_droplet.es.ipv4_address_private}"
+	value = digitalocean_droplet.es.ipv4_address_private
 }
 
 resource "digitalocean_record" "private_ci" {
 	domain = "jonathan-boudreau.com"
 	name = "ci.private"
 	type = "A"
-	value = "${digitalocean_droplet.ci.ipv4_address_private}"
+	value = digitalocean_droplet.ci.ipv4_address_private
 }
 
 resource "digitalocean_record" "private_data" {
 	domain = "jonathan-boudreau.com"
 	name = "data.private"
 	type = "A"
-	value = "${digitalocean_droplet.data.ipv4_address_private}"
+	value = digitalocean_droplet.data.ipv4_address_private
 }
 
 resource "digitalocean_record" "private_front" {
@@ -151,7 +151,7 @@ resource "digitalocean_record" "git" {
 	domain = "jonathan-boudreau.com"
 	name = "git"
 	type = "A"
-	value = "${digitalocean_droplet.ci.ipv4_address}"
+	value = digitalocean_droplet.ci.ipv4_address
 }
 
 resource "digitalocean_record" "fingerboard" {
@@ -203,5 +203,15 @@ resource "digitalocean_record" "alerts_mxb" {
   name = "alerts"
   value = "mxb.mailgun.org."
   priority = 10
+}
+# }}}
+
+# {{{ modules
+module "k3s" {
+	source = "./modules/k3s"
+	nodes = 1
+	size = var.size
+	region = var.region
+	ssh_keys = [digitalocean_ssh_key.default.id]
 }
 # }}}
