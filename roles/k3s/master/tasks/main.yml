@@ -1,0 +1,38 @@
+
+- name: set private ip
+  set_fact:
+    private_ip: "{{ ansible_eth1['ipv4']['address'] }}"
+
+- name: open up port for server
+  ufw:
+    state: reloaded
+    policy: allow
+    to_ip: "{{ private_ip }}"
+    to_port: "6443"
+
+- name: make sure the firewall is enabled
+  ufw:
+    state: enabled
+
+- name: create systemd unit file
+  template:
+    src: k3s.service.j2
+    dest: /etc/systemd/system/k3s.service
+  register: k3s_service
+
+- name: enable k3s server
+  when: k3s_service.changed
+  systemd:
+    name: k3s
+    daemon_reload: True
+    state: restarted
+    enabled: True
+
+- name: grab authentication token
+  slurp:
+    path: /var/lib/rancher/k3s/server/token
+  register: k3s_token_file
+
+- name: set token
+  set_fact:
+    k3s_token: "{{ k3s_token_file.content | b64decode | trim }}"

@@ -1,0 +1,28 @@
+
+- name: check if swapfile exists
+  stat:
+    path: /swapfile
+  register: swapfile
+
+- name: create swapfile
+  when: not swapfile.stat.exists
+  command: dd if=/dev/zero of=/swapfile bs=1M count=1024
+  register: swapfile_created
+
+- name: format swapfile
+  when: swapfile_created.changed
+  command: mkswap /swapfile
+
+- name: set permissions
+  file:
+    path: /swapfile
+    mode: 0600
+
+- name: update fstab
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^/swapfile'
+    line: '/swapfile none swap defaults 0 0'
+
+- name: enable swap
+  command: swapon -a

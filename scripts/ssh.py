@@ -23,11 +23,20 @@ response = requests.get(
 
 droplets = response.json()['droplets']
 
-ip = droplets[0]['networks']['v4'][0]['ip_address']
+ip = [
+    network['ip_address']
+    for network in droplets[0]['networks']['v4']
+    if network['type'] == 'public'
+][0]
 
 port = 22
 if tag == 'ci':
     port = 2222
 
 # bit of syscall magic...
-execlp('ssh', 'ssh', '-p', str(port), '-i', '~/.ssh/do', 'root@{}'.format(ip))
+execlp(
+    'ssh',
+    'ssh',
+    '-p', str(port),
+    '-i', '{}/.ssh/do'.format(environ['HOME']),
+    'root@{}'.format(ip))

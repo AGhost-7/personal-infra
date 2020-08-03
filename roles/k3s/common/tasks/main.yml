@@ -1,0 +1,13 @@
+- name: enable ip forwarding
+  loop:
+    - net.ipv4.ip_forward
+    - net.ipv6.conf.all.forwarding
+  sysctl:
+    name: "{{ item }}"
+    value: "1"
+
+- name: download the k3s binary
+  get_url:
+    url: "https://github.com/rancher/k3s/releases/download/v1.18.6%2Bk3s1/k3s"
+    dest: /usr/local/bin/k3s
+    mode: "0755"
