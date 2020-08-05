@@ -36,3 +36,13 @@
 - name: set token
   set_fact:
     k3s_token: "{{ k3s_token_file.content | b64decode | trim }}"
+
+- name: install pip
+  apt:
+    name: python3-pip
+
+- name: install python dependencies
+  pip:
+    name:
+      - kubernetes
+      - openshift

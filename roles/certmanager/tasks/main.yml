@@ -1,0 +1,42 @@
+
+- name: download manifests
+  get_url:
+    force: True
+    url: "https://github.com/jetstack/cert-manager/releases/download/v0.16.0/cert-manager.yaml"
+    dest: /tmp/cert-manager.yml
+
+- name: install certmanager
+  k8s:
+    src: /tmp/cert-manager.yml
+
+- name: create secret
+  k8s:
+    definition:
+      kind: Secret
+      metadata:
+        name: digitalocean-dns
+        namespace: cert-manager
+      type: Opaque
+      data:
+        access-token: "{{ certmanager_digitalocean_key | b64encode }}"
+
+- name: create tld cert issuer
+  k8s:
+    definition:
+      apiVersion: cert-manager.io/v1alpha2
+      kind: Issuer
+      metadata:
+        name: tld-issuer
+        namespace: default
+      spec:
+        acme:
+          email: jonathan.boudreau.92@gmail.com
+          server: "https://acme-v02.api.letsencrypt.org/directory"
+          privateKeySecretRef:
+            name: tld-key
+          solvers:
+          - dns01:
+              digitalocean:
+                tokenSecretRef:
+                  name: digitalocean-dns
+                  key: access-token
