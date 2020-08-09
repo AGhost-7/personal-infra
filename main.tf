@@ -117,6 +117,16 @@ resource "digitalocean_droplet" "es" {
 
 # }}}
 
+# {{{ modules
+module "k3s" {
+	source = "./modules/k3s"
+	nodes = 1
+	size = var.size
+	region = var.region
+	ssh_keys = [digitalocean_ssh_key.default.id]
+}
+# }}}
+
 # {{{ dns
 
 resource "digitalocean_record" "private_es" {
@@ -172,7 +182,7 @@ resource "digitalocean_record" "jokes" {
 	domain = "jonathan-boudreau.com"
 	name = "jokes"
 	type = "CNAME"
-	value = "jonathan-boudreau.com."
+	value = "k3s.jonathan-boudreau.com."
 }
 
 resource "digitalocean_record" "alerts" {
@@ -204,14 +214,12 @@ resource "digitalocean_record" "alerts_mxb" {
   value = "mxb.mailgun.org."
   priority = 10
 }
-# }}}
 
-# {{{ modules
-module "k3s" {
-	source = "./modules/k3s"
-	nodes = 1
-	size = var.size
-	region = var.region
-	ssh_keys = [digitalocean_ssh_key.default.id]
+resource "digitalocean_record" "k3s" {
+	domain = "jonathan-boudreau.com"
+	name = "k3s"
+	type = "A"
+	value = module.k3s.master_ip
 }
 # }}}
+

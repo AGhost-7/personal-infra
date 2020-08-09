@@ -1,10 +1,4 @@
-- name: bring up the database
-  hosts: data
-  roles:
-    - mongo
-
 - name: spin up jokes app
-  hosts: front
+  hosts: k3s_master
   roles:
-    - load_balancer
     - jokemongo
