@@ -1,48 +1,102 @@
-- name: build jenkins image
-  delegate_to: localhost
-  docker_image:
-    pull: True
-    force: True
-    push: True
-    name: aghost7/jenkins-ansible
-    path: images/jenkins
 
-- name: create ansible user
-  user:
-    name: ansible
-    uid: 1000
-    groups:
-      - docker
-      - sudo
+- name: create namespace
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: jenkins
 
-- name: create jenkins directory
-  file:
-    state: directory
-    owner: 1000
-    path: /var/containers/jenkins/jenkins_home
+- name: create pvc
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: jenkins-home
+        namespace: jenkins
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: local-path
 
-- name: open up jenkins port to load balancer
-  with_items: "{{groups['front']}}"
-  ufw:
-    rule: allow
-    from_ip: "{{item}}"
-    port: 8080
+- name: create deployment
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Deployment
+      metadata:
+        name: jenkins
+        namespace: jenkins
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            type: build
+            build: jenkins
+        template:
+          metadata:
+            labels:
+              type: build
+              build: jenkins
+          spec:
+            containers:
+            - name: jenkins
+              image: jenkins/jenkins:lts
+              volumeMounts:
+              - mountPath: "/var/jenkins_home"
+                name: jenkins-home
+            volumes:
+            - name: jenkins-home
+              persitentVolumeClaim:
+                claimName: jenkins-home
 
-- name: find docker gid
-  register: docker_gid
-  shell: "cat /etc/group  | grep -E '^docker' | cut -d : -f 3"
+- name: Create jenkins service
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: jenkins
+        namespace: jenkins
+      spec:
+        selector:
+          type: build
+          build: jenkins
+        ports:
+          - port: 8080
+            targetPort: 8080
+            protocol: TCP
+            name: http
 
-- name: jenkins docker image
-  docker_container:
-    pull: True
-    restart_policy: on-failure
-    name: jenkins
-    image: aghost7/jenkins-ansible
-    groups:
-      - "{{docker_gid.stdout}}"
-    env:
-      DOCKER_GID: "{{docker_gid.stdout}}"
-    volumes:
-      - /var/containers/jenkins/jenkins_home:/var/jenkins_home
-      - /run/docker.sock:/run/docker.sock
-    network_mode: host
+- name: create ingress
+  k8s:
+    apply: True
+    definition:
+      apiVersion: networking.k8s.io/v1beta1
+      kind: Ingress
+      metadata:
+        name: jenkins
+        namespace: jenkins
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          cert-manager.io/cluster-issuer: jonathan-boudreau
+      spec:
+        tls:
+        - hosts:
+          - jenkins2.jonathan-boudreau.com
+          secretName: ingress-tls-cert
+        rules:
+        - host: jenkins2.jonathan-boudreau.com
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                serviceName: jenkins
+                servicePort: 8080

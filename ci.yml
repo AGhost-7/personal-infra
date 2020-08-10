@@ -1,15 +1,5 @@
 
 - name: setup ci server
-  hosts: ci
+  hosts: k3s_master
   roles:
     - jenkins
-
-- name: load balancer
-  hosts: front
-  roles:
-    - load_balancer
-
-- name: jenkins ssh access
-  hosts: front
-  roles:
-    - jenkins_ssh

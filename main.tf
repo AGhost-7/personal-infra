@@ -178,6 +178,13 @@ resource "digitalocean_record" "jenkins" {
 	value = "jonathan-boudreau.com."
 }
 
+resource "digitalocean_record" "jenkins2" {
+	domain = "jonathan-boudreau.com"
+	name = "jenkins2"
+	type = "CNAME"
+	value = "k3s.jonathan-boudreau.com."
+}
+
 resource "digitalocean_record" "jokes" {
 	domain = "jonathan-boudreau.com"
 	name = "jokes"
