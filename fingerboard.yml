@@ -1,6 +1,5 @@
 
 - name: spin up fingerboard app
-  hosts: front
+  hosts: k3s_master
   roles:
     - fingerboard_app
-    - load_balancer

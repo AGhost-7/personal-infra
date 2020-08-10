@@ -1,8 +1,81 @@
-- name: docker container
-  docker_container:
-    name: fingerboard
-    pull: True
-    image: aghost7/fingerboard.js
-    restart_policy: unless-stopped
-    ports:
-      - 127.0.0.1:8000:8000
+- name: create namespace
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: fingerboard
+        labels:
+          project: fingerboard
+
+- name: create deployment
+  k8s:
+    apply: True
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: fingerboard
+        namespace: fingerboard
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            type: app
+            app: fingerboard
+        template:
+          metadata:
+            labels:
+              type: app
+              app: fingerboard
+          spec:
+            containers:
+              - name: fingerboard
+                image: aghost7/fingerboard.js
+                imagePullPolicy: Always
+
+- name: create service
+  k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: fingerboard
+        namespace: fingerboard
+      spec:
+        selector:
+          type: app
+          app: fingerboard
+        ports:
+        - port: 8000
+          targetPort: 8000
+          protocol: TCP
+          name: http
+
+- name: create ingress
+  k8s:
+    apply: True
+    definition:
+      apiVersion: networking.k8s.io/v1beta1
+      kind: Ingress
+      metadata:
+        name: fingerboard
+        namespace: fingerboard
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          cert-manager.io/cluster-issuer: jonathan-boudreau
+      spec:
+        tls:
+        - hosts:
+          - fingerboard.jonathan-boudreau.com
+          secretName: ingress-tls-cert
+        rules:
+        - host: fingerboard.jonathan-boudreau.com
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                serviceName: fingerboard
+                servicePort: 8000

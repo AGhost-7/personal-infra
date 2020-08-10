@@ -168,7 +168,7 @@ resource "digitalocean_record" "fingerboard" {
 	domain = "jonathan-boudreau.com"
 	name = "fingerboard"
 	type = "CNAME"
-	value = "jonathan-boudreau.com."
+	value = "k3s.jonathan-boudreau.com."
 }
 
 resource "digitalocean_record" "jenkins" {
