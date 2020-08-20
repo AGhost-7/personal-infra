@@ -7,6 +7,53 @@
       metadata:
         name: jenkins
 
+- name: create namespace for jenkins to run jobs in
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: jenkins-job
+
+- name: create jenkins service account
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: jenkins
+        namespace: jenkins
+
+- name: create jenkins role
+  k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: jenkins-role
+        namespace: jenkins-job
+      rules:
+      - apiGroups: [""]
+        resources: ["pods"]
+        verbs: ["create", "update", "delete", "get", "list", "watch"]
+
+- name: bind role to jenkins service account
+  k8s:
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        namespace: jenkins-job
+        name: jenkins-role-binding
+      subjects:
+      - kind: ServiceAccount
+        name: jenkins
+        namespace: jenkins
+      roleRef:
+        kind: Role
+        name: jenkins-role
+        apiGroup: rbac.authorization.k8s.io
+
 - name: create pvc
   k8s:
     definition:
@@ -21,10 +68,11 @@
         resources:
           requests:
             storage: 2Gi
-        storageClassName: local-path
+        storageClassName: "{{ jenkins_storage_class }}"
 
 - name: create deployment
   k8s:
+    apply: True
     definition:
       apiVersion: v1
       kind: Deployment
@@ -50,10 +98,11 @@
               image: jenkins/jenkins:lts
               volumeMounts:
               - mountPath: "/var/jenkins_home"
-                name: jenkins-home
+                name: jenkins-home-vol
+            serviceAccountName: jenkins
             volumes:
-            - name: jenkins-home
-              persitentVolumeClaim:
+            - name: jenkins-home-vol
+              persistentVolumeClaim:
                 claimName: jenkins-home
 
 - name: Create jenkins service
