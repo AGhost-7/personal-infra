@@ -26,6 +26,7 @@
 
 - name: create jenkins role
   k8s:
+    apply: True
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: Role
@@ -36,6 +37,9 @@
       - apiGroups: [""]
         resources: ["pods"]
         verbs: ["create", "update", "delete", "get", "list", "watch"]
+      - apiGroups: [""]
+        resources: ["events", "pods/exec"]
+        verbs: ["get", "list", "watch"]
 
 - name: bind role to jenkins service account
   k8s:
@@ -107,6 +111,7 @@
 
 - name: Create jenkins service
   k8s:
+    apply: True
     definition:
       apiVersion: v1
       kind: Service
@@ -118,10 +123,14 @@
           type: build
           build: jenkins
         ports:
-          - port: 8080
-            targetPort: 8080
-            protocol: TCP
-            name: http
+        - port: 8080
+          targetPort: 8080
+          protocol: TCP
+          name: http
+        - port: 50000
+          targetPort: 50000
+          protocol: TCP
+          name: jnlp
 
 - name: create ingress
   k8s:
