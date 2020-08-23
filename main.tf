@@ -57,10 +57,6 @@ resource "digitalocean_tag" "default" {
 	name = var.namespace
 }
 
-resource "digitalocean_tag" "ci" {
-	name = "ci"
-}
-
 resource "digitalocean_tag" "data" {
 	name = "data"
 }
@@ -81,28 +77,6 @@ resource "digitalocean_droplet" "data" {
 	private_networking = true
 	ssh_keys = [digitalocean_ssh_key.default.id]
 	tags = [digitalocean_tag.default.id, "data"]
-}
-
-resource "digitalocean_droplet" "ci" {
-	name = "ci"
-	image = var.image
-	region = var.region
-	size = var.size
-	private_networking = true
-	ssh_keys = [digitalocean_ssh_key.default.id]
-	tags = [digitalocean_tag.default.id, "ci"]
-
-	# TODO: implement own backup solution
-	backups = true
-
-	provisioner "remote-exec" {
-		inline = [
-			"ufw allow 2222",
-			"ufw reload",
-			"sed -i 's/Port 22/Port 2222/' /etc/ssh/sshd_config",
-			"systemctl restart ssh"
-		]
-	}
 }
 
 resource "digitalocean_droplet" "es" {
@@ -136,13 +110,6 @@ resource "digitalocean_record" "private_es" {
 	value = digitalocean_droplet.es.ipv4_address_private
 }
 
-resource "digitalocean_record" "private_ci" {
-	domain = "jonathan-boudreau.com"
-	name = "ci.private"
-	type = "A"
-	value = digitalocean_droplet.ci.ipv4_address_private
-}
-
 resource "digitalocean_record" "private_data" {
 	domain = "jonathan-boudreau.com"
 	name = "data.private"
@@ -157,13 +124,6 @@ resource "digitalocean_record" "private_front" {
 	value = "138.197.153.75"
 }
 
-resource "digitalocean_record" "git" {
-	domain = "jonathan-boudreau.com"
-	name = "git"
-	type = "A"
-	value = digitalocean_droplet.ci.ipv4_address
-}
-
 resource "digitalocean_record" "fingerboard" {
 	domain = "jonathan-boudreau.com"
 	name = "fingerboard"
@@ -174,13 +134,6 @@ resource "digitalocean_record" "fingerboard" {
 resource "digitalocean_record" "jenkins" {
 	domain = "jonathan-boudreau.com"
 	name = "jenkins"
-	type = "CNAME"
-	value = "jonathan-boudreau.com."
-}
-
-resource "digitalocean_record" "jenkins2" {
-	domain = "jonathan-boudreau.com"
-	name = "jenkins2"
 	type = "CNAME"
 	value = "k3s.jonathan-boudreau.com."
 }

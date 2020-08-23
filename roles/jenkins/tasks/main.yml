@@ -100,6 +100,13 @@
             containers:
             - name: jenkins
               image: jenkins/jenkins:lts
+              resources:
+                limits:
+                  cpu: "800m"
+                  memory: "600Mi"
+                requests:
+                  cpu: "200m"
+                  memory: "300Mi"
               volumeMounts:
               - mountPath: "/var/jenkins_home"
                 name: jenkins-home-vol
@@ -147,10 +154,10 @@
       spec:
         tls:
         - hosts:
-          - jenkins2.jonathan-boudreau.com
+          - jenkins.jonathan-boudreau.com
           secretName: ingress-tls-cert
         rules:
-        - host: jenkins2.jonathan-boudreau.com
+        - host: jenkins.jonathan-boudreau.com
           http:
             paths:
             - path: /
