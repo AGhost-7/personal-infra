@@ -181,5 +181,13 @@ resource "digitalocean_record" "k3s" {
 	type = "A"
 	value = module.k3s.master_ip
 }
+
+resource "digitalocean_record" "prom" {
+	domain = "jonathan-boudreau.com"
+	name = "prom"
+	type = "CNAME"
+	value = "k3s.jonathan-boudreau.com."
+}
+
 # }}}
 

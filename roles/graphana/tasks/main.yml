@@ -1,0 +1,10 @@
+- name: make sure helm is set up
+  pip:
+    name:
+      - pyhelm
+      - grpcio
+
+      - name: install graphana
+        helm:
+          host: localhost
+          chart:

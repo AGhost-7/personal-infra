@@ -1,19 +1,5 @@
-- name: configure logging and netdata
-  hosts: all
+- name: deploy kube-state-metrics
+  hosts: k3s_master
   roles:
-    - netdata
-    - docker
-    - rsyslog
-
-- name: spin up elasticsearch
-  hosts: es
-  roles:
-    - elasticsearch
-
-- name: spin up everything else for metrics
-  hosts: data
-  roles:
-    - logstash
-    - kibana
     - prometheus
-    - curator
+    - kube_state_metrics

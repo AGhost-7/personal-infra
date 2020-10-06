@@ -1,102 +1,180 @@
-- name: create config directory
-  loop:
-    - prometheus
-    - blackbox_exporter
-    - alertmanager
-  file:
-    state: directory
-    path: /var/containers/{{item}}/config
 
-- name: ensure prometheus config file exists
-  file:
-    state: touch
-    path: /var/containers/prometheus/config/prometheus.yml
+- name: create namespace
+  k8s:
+    definition:
+      kind: Namespace
+      apiVersion: v1
+      metadata:
+        name: prometheus
+        labels:
+          component: metric-scraper
 
-- name: create rules directory
-  file:
-    state: directory
-    path: /var/containers/prometheus/rules
+- name: create pvc
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: prometheus-data
+        namespace: prometheus
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: "{{ prometheus_storage_class }}"
 
-- name: open up firewall
-  ufw:
-    rule: allow
-    direction: in
-    interface: lo
-    port: 9090
-  notify:
-    - "reload firewall"
+- name: create configmap
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: prometheus-config
+        namespace: prometheus
+      data:
+        blackbox-exporter.yml: |
+          modules:
+            http_2xx:
+              prober: http
+              http:
+                fail_if_not_ssl: true
+                preferred_ip_protocol: ip4
+        prometheus.yml: |
+          global:
+            scrape_interval: 30s
+            evaluation_interval: 30s
+          scrape_configs:
+          - job_name: 'kube-state-metrics'
+            static_configs:
+            - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
+          - job_name: 'blackbox_probes'
+            metrics_path: /probe
+            static_configs:
+              - targets:
+                - "https://jokes.jonathan-boudreau.com"
+                - "https://jenkins.jonathan-boudreau.com"
+            relabel_configs:
+            - source_labels: [__address__]
+              target_label: __param_target
+            - source_labels: [__param_target]
+              target_label: instance
+            - target_label: __address__
+              replacement: localhost:9115
 
-- name: create prometheus container
-  docker_container:
-    name: prometheus
-    pull: True
-    # Use json-file since we need prometheus to monitor the elasic logger. They
-    # shouldn't be interdependent in case elastic fails.
-    log_driver: json-file
-    image: prom/prometheus
-    command: "--config.file=/etc/prometheus/config/prometheus.yml"
-    network_mode: host
-    restart_policy: unless-stopped
-    volumes:
-      - /var/containers/prometheus/prometheus:/prometheus
-      - /var/containers/prometheus/config:/etc/prometheus/config
-      - /var/containers/prometheus/rules:/etc/prometheus/rules
+- name: deploy prometheus pods
+  k8s:
+    apply: True
+    definition:
+      kind: Deployment
+      apiVersion: apps/v1
+      metadata:
+        name: prometheus
+        namespace: prometheus
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            type: metric
+            metric: prometheus
+        template:
+          metadata:
+            labels:
+              type: metric
+              metric: prometheus
+          spec:
+            containers:
+            - name: blackbox-exporter
+              image: prom/blackbox-exporter
+              args:
+              - "--config.file=/config/blackbox-exporter.yml"
+              volumeMounts:
+              - mountPath: "/config"
+                name: prometheus-config-vol
+            - name: prometheus
+              image: prom/prometheus
+              args:
+              - "--config.file=/etc/prometheus/config/prometheus.yml"
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "80Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "200Mi"
+              volumeMounts:
+              - mountPath: "/prometheus"
+                name: prometheus-data-vol
+              - mountPath: "/etc/prometheus/config"
+                name: prometheus-config-vol
+            volumes:
+            - name: prometheus-data-vol
+              persistentVolumeClaim:
+                claimName: prometheus-data
+            - name: prometheus-config-vol
+              configMap:
+                name: prometheus-config
 
-- name: generate prometheus config
-  template:
-    src: prometheus.yml.j2
-    dest: /var/containers/prometheus/config/prometheus.yml
-  notify:
-    - "reload prometheus"
+- name: create prometheus service
+  k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: prometheus
+        namespace: prometheus
+      spec:
+        selector:
+          type: metric
+          metric: prometheus
+        ports:
+        - port: 9090
+          targetPort: 9090
+          protocol: TCP
+          name: http
 
-- name: copy prometheus rules config
-  copy:
-    src: file/rules.yml
-    dest: /var/containers/prometheus/rules/rules.yml
-  notify:
-    - "reload prometheus"
+- name: create basic auth secret
+  k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: prometheus-auth
+        namespace: prometheus
+      type: Opaque
+      stringData:
+        auth: "{{ prometheus_htpasswd }}"
 
-- name: create alertmanager container
-  docker_container:
-    name: alertmanager
-    image: prom/alertmanager:v0.17.0
-    log_driver: json-file
-    network_mode: host
-    restart_policy: always
-    volumes:
-      - /var/containers/alertmanager/config:/config
-      - /var/containers/alertmanager/templates:/templates
-    command: "--config.file=/config/alertmanager.yml"
-
-- name: generate alertmanager config
-  template:
-    src: alertmanager.yml.j2
-    dest: /var/containers/alertmanager/config/alertmanager.yml
-  notify:
-    - "reload alertmanager"
-
-- name: create email template directory
-  file:
-    state: directory
-    path: /var/containers/alertmanager/templates
-
-- name: bring up the blackbox exporter
-  docker_container:
-    name: blackbox_exporter
-    log_driver: json-file
-    image: prom/blackbox-exporter:v0.14.0
-    network_mode: host
-    restart_policy: always
-    volumes:
-      - /var/containers/blackbox_exporter/config:/config
-    command: "--config.file=/config/blackbox.yml"
-
-- name: generate blackbox config
-  template:
-    src: blackbox.yml.j2
-    dest: /var/containers/blackbox_exporter/config/blackbox.yml
-  notify:
-    - "reload blackbox_exporter"
-# TODO: Will need to leverage prometheus to check application status:
-# https://github.com/prometheus/blackbox_exporter
-# Alerts can be done from prometheus...
+- name: expose prometheus
+  k8s:
+    apply: True
+    definition:
+      apiVersion: networking.k8s.io/v1beta1
+      kind: Ingress
+      metadata:
+        name: prometheus-ingress
+        namespace: prometheus
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          cert-manager.io/cluster-issuer: jonathan-boudreau
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: prometheus-auth
+          nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+      spec:
+        tls:
+        - hosts:
+          - prom.jonathan-boudreau.com
+          secretName: ingress-tls-cert
+        rules:
+        - host: prom.jonathan-boudreau.com
+          http:
+            paths:
+            - path: /
+              backend:
+                serviceName: prometheus
+                servicePort: 9090
