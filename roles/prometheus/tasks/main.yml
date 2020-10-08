@@ -25,13 +25,41 @@
             storage: 2Gi
         storageClassName: "{{ prometheus_storage_class }}"
 
-- name: create configmap
+- name: create alertmanager pvc
   k8s:
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: alertmanager-data
+        namespace: prometheus
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: "{{ prometheus_storage_class }}"
+
+- name: create smtp secret
+  k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: alertmanager-secret
+        namespace: prometheus
+      stringData:
+        smtp_auth_password: "{{ prometheus_mail_password }}"
+
+- name: create blackbox config
+  k8s:
+    apply: True
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: prometheus-config
+        name: blackbox-config
         namespace: prometheus
       data:
         blackbox-exporter.yml: |
@@ -41,6 +69,64 @@
               http:
                 fail_if_not_ssl: true
                 preferred_ip_protocol: ip4
+
+- name: create alertmanager config
+  k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: alertmanager-config
+        namespace: prometheus
+      data:
+        alertmanager.yml: |
+          global:
+            smtp_from: noreply@alerts.jonathan-boudreau.com
+            smtp_smarthost: "smtp.mailgun.org:587"
+            smtp_auth_username: {{ prometheus_mail_username }}
+            smtp_auth_password: # smtp_auth_password
+          templates:
+            - '/templates/*.tmpl'
+          route:
+            receiver: 'default'
+          receivers:
+          - name: 'default'
+            email_configs:
+            - to: "{{ prometheus_mail_recipient }}"
+              from: "noreply@alerts.jonathan-boudreau.com"
+
+- name: create rules config
+  k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: rules-config
+        namespace: prometheus
+      data:
+        rules.yml: |
+          groups:
+          - name: down
+            rules:
+            - alert: Down
+              expr: probe_success == 0
+              for: 5m
+              annotations:
+                summary: "{{ '{{' }}$labels.instance{{ '}}' }} is down"
+                description: "{{ '{{' }}$labels.instance{{ '}}' }} has been down for 5 minutes."
+
+- name: create prometheus config
+  k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: prometheus-config
+        namespace: prometheus
+      data:
         prometheus.yml: |
           global:
             scrape_interval: 30s
@@ -62,6 +148,12 @@
               target_label: instance
             - target_label: __address__
               replacement: localhost:9115
+          rule_files: ['/etc/prometheus/rules/*.yml']
+          alerting:
+            alertmanagers:
+            - static_configs:
+              - targets: ['localhost:9093']
+
 
 - name: deploy prometheus pods
   k8s:
@@ -87,13 +179,28 @@
               metric: prometheus
           spec:
             containers:
+            - name: alertmanager
+              image: prom/alertmanager
+              command: [sh]
+              args:
+              - -c
+              - |
+                set -e
+                sed "s/# smtp_auth_password/$(cat /secret/smtp_auth_password)/" /config/alertmanager.yml > /home/alertmanager.yml
+                exec alertmanager --config.file=/home/alertmanager.yml
+              volumeMounts:
+              - mountPath: /config
+                name: alertmanager-config-vol
+              - mountPath: /secret
+                name: alertmanager-secret-vol
+                readOnly: true
             - name: blackbox-exporter
               image: prom/blackbox-exporter
               args:
               - "--config.file=/config/blackbox-exporter.yml"
               volumeMounts:
               - mountPath: "/config"
-                name: prometheus-config-vol
+                name: blackbox-config-vol
             - name: prometheus
               image: prom/prometheus
               args:
@@ -110,6 +217,8 @@
                 name: prometheus-data-vol
               - mountPath: "/etc/prometheus/config"
                 name: prometheus-config-vol
+              - mountPath: "/etc/prometheus/rules"
+                name: rules-config-vol
             volumes:
             - name: prometheus-data-vol
               persistentVolumeClaim:
@@ -117,6 +226,18 @@
             - name: prometheus-config-vol
               configMap:
                 name: prometheus-config
+            - name: blackbox-config-vol
+              configMap:
+                name: blackbox-config
+            - name: rules-config-vol
+              configMap:
+                name: rules-config
+            - name: alertmanager-config-vol
+              configMap:
+                name: alertmanager-config
+            - name: alertmanager-secret-vol
+              secret:
+                secretName: alertmanager-secret
 
 - name: create prometheus service
   k8s:
