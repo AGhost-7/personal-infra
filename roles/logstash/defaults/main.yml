@@ -1,1 +1,0 @@
-logstash_host: "{{hostvars[ansible_host][ufw_default_interface].ipv4.address}}"

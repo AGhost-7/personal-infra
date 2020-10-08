@@ -1,5 +1,0 @@
-- name: bring up certbot
-  hosts: front
-  roles:
-    - certbot
-    - load_balancer

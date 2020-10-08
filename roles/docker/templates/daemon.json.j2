@@ -1,7 +1,0 @@
-{
-	"log-driver": "syslog",
-	"log-opts": {
-		"syslog-address": "tcp://{{hostvars[groups['data'][0]][ufw_default_interface].ipv4.address}}:5000",
-		"tag": "{{ '{{' }}.Name{{ '}}' }}"
-	}
-}

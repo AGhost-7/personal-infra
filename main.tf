@@ -10,17 +10,6 @@ variable "region" {
 	default = "tor1"
 }
 
-# https://github.com/AGhost-7/digitalocean-images
-# this should be the image's ID returned in the output when packer finishes
-# building.
-variable "image" {
-	default = "33359121"
-}
-
-variable "image_ufw" {
-	default = "37337493"
-}
-
 # }}}
 
 # {{{ auth
@@ -51,46 +40,6 @@ resource "digitalocean_ssh_key" "default" {
 
 # }}}
 
-# {{{ tags
-
-resource "digitalocean_tag" "default" {
-	name = var.namespace
-}
-
-resource "digitalocean_tag" "data" {
-	name = "data"
-}
-
-resource "digitalocean_tag" "es" {
-	name = "es"
-}
-
-# }}}
-
-# {{{ machines
-
-resource "digitalocean_droplet" "data" {
-	name = "data"
-	image = var.image_ufw
-	region = var.region
-	size = var.size
-	private_networking = true
-	ssh_keys = [digitalocean_ssh_key.default.id]
-	tags = [digitalocean_tag.default.id, "data"]
-}
-
-resource "digitalocean_droplet" "es" {
-	name = "es"
-	image = var.image
-	region = var.region
-	size = var.size
-	private_networking = true
-	ssh_keys = [digitalocean_ssh_key.default.id]
-	tags = [digitalocean_tag.default.id, "es"]
-}
-
-# }}}
-
 # {{{ modules
 module "k3s" {
 	source = "./modules/k3s"
@@ -102,27 +51,6 @@ module "k3s" {
 # }}}
 
 # {{{ dns
-
-resource "digitalocean_record" "private_es" {
-	domain = "jonathan-boudreau.com"
-	name = "es.private"
-	type = "A"
-	value = digitalocean_droplet.es.ipv4_address_private
-}
-
-resource "digitalocean_record" "private_data" {
-	domain = "jonathan-boudreau.com"
-	name = "data.private"
-	type = "A"
-	value = digitalocean_droplet.data.ipv4_address_private
-}
-
-resource "digitalocean_record" "private_front" {
-	domain = "jonathan-boudreau.com"
-	name = "front.private"
-	type = "A"
-	value = "138.197.153.75"
-}
 
 resource "digitalocean_record" "fingerboard" {
 	domain = "jonathan-boudreau.com"
