@@ -120,8 +120,8 @@
         ingress:
         - from:
           - namespaceSelector:
-            matchLabels:
-                project: jokemongo
+              matchLabels:
+                  project: jokemongo
 
 - name: create joke deployment
   k8s:
