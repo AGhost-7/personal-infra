@@ -99,7 +99,7 @@
           spec:
             containers:
             - name: jenkins
-              image: jenkins/jenkins:lts
+              image: jenkins/jenkins:2.263.1
               resources:
                 limits:
                   cpu: "800m"
