@@ -1,0 +1,13 @@
+
+- name: update apt cache
+  apt:
+    update_cache: yes
+
+- name: upgrade dependencies
+  apt:
+    upgrade: yes
+  register: upgrade
+
+- name: restart machine
+  when: upgrade.changed
+  reboot:
