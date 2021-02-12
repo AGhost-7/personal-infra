@@ -14,6 +14,15 @@ variable "region" {
 
 # {{{ auth
 
+terraform {
+	required_providers {
+		digitalocean = {
+			source = "digitalocean/digitalocean"
+			version = "~> 2.5.1"
+		}
+	}
+}
+
 provider "digitalocean" {}
 
 # }}}
@@ -43,7 +52,7 @@ resource "digitalocean_ssh_key" "default" {
 # {{{ modules
 module "k3s" {
 	source = "./modules/k3s"
-	nodes = 1
+	nodes = 2
 	size = var.size
 	region = var.region
 	ssh_keys = [digitalocean_ssh_key.default.id]

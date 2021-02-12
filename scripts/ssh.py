@@ -16,6 +16,9 @@ headers = {
 }
 
 tag = argv[1]
+index = 0
+if len(argv) > 2:
+    index = int(argv[2])
 
 response = requests.get(
     'https://api.digitalocean.com/v2/droplets?tag_name={}'.format(tag),
@@ -25,7 +28,7 @@ droplets = response.json()['droplets']
 
 ip = [
     network['ip_address']
-    for network in droplets[0]['networks']['v4']
+    for network in droplets[index]['networks']['v4']
     if network['type'] == 'public'
 ][0]
 

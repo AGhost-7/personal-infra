@@ -7,7 +7,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/local/bin/k3s agent --server https://{{ k3s_master_address }}:6443 --token {{ k3s_master_token }}
+ExecStart=/usr/local/bin/k3s agent --server https://{{ k3s_master_address }}:6443 --token {{ k3s_master_token }} --node-label='kubelet.kubernetes.io/role=worker'
 KillMode=process
 Delegate=yes
 LimitNOFILE=1048576
