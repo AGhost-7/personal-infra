@@ -20,3 +20,7 @@
     daemon_reload: True
     state: restarted
     enabled: True
+
+- name: set label
+  delegate_to: "{{ groups['k3s_master'][0] }}"
+  command: kubectl label node --overwrite {{ ansible_hostname }} kubernetes.io/role=worker
