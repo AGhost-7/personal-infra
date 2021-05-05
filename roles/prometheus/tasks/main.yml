@@ -154,7 +154,6 @@
             - static_configs:
               - targets: ['localhost:9093']
 
-
 - name: deploy prometheus pods
   k8s:
     apply: True

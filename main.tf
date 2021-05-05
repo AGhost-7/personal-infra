@@ -61,6 +61,13 @@ module "k3s" {
 
 # {{{ dns
 
+resource "digitalocean_record" "grafana" {
+	domain = "jonathan-boudreau.com"
+	name = "grafana"
+	type = "CNAME"
+	value = "k3s.jonathan-boudreau.com."
+}
+
 resource "digitalocean_record" "fingerboard" {
 	domain = "jonathan-boudreau.com"
 	name = "fingerboard"

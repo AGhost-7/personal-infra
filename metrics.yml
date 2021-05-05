@@ -3,3 +3,4 @@
   roles:
     - prometheus
     - kube_state_metrics
+    - grafana
