@@ -74,6 +74,13 @@
                     secretKeyRef:
                       name: jokemongo-secret
                       key: password
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "100Mi"
+                limits:
+                  cpu: "100m"
+                  memory: "200Mi"
               ports:
                 - containerPort: 27017
               volumeMounts:
@@ -164,6 +171,13 @@
                   secretKeyRef:
                     name: jokemongo-secret
                     key: password
+              resources:
+                requests:
+                  cpu: "50m"
+                  memory: "150Mi"
+                limits:
+                  cpu: "50m"
+                  memory: "150Mi"
 
 - name: create service for joke app
   k8s:

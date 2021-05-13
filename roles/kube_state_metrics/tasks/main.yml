@@ -178,6 +178,13 @@
                 containerPort: 8080
               - name: telemetry
                 containerPort: 8081
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "100Mi"
+                limits:
+                  cpu: "200m"
+                  memory: "150Mi"
             serviceAccountName: kube-state-metrics
 
 - name: create network policy

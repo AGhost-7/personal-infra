@@ -1,9 +1,0 @@
-- name: open up netdata port to prometheus
-  loop: "{{groups['data']}}"
-  ufw:
-    rule: allow
-    direction: in
-    interface: "{{private_interface}}"
-    port: 19999
-  notify:
-    - "reload firewall"

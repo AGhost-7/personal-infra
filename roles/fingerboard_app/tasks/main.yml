@@ -32,6 +32,13 @@
             containers:
               - name: fingerboard
                 image: aghost7/fingerboard.js
+                resources:
+                  requests:
+                    cpu: "50m"
+                    memory: "100Mi"
+                  limits:
+                    cpu: "50m"
+                    memory: "100Mi"
                 imagePullPolicy: Always
 
 - name: create service

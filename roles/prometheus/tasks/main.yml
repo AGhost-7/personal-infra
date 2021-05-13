@@ -40,6 +40,47 @@
             storage: 1Gi
         storageClassName: "{{ prometheus_storage_class }}"
 
+- name: create service account
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: prometheus
+        namespace: prometheus
+
+- name: create prometheus role
+  k8s:
+    apply: True
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: prometheus-role
+      rules:
+      - apiGroups: [""]
+        resources: ["nodes"]
+        verbs: ["get", "list", "watch"]
+      - nonResourceURLs: ["/metrics"]
+        verbs: ["get"]
+
+- name: assign role to service account
+  k8s:
+    apply: True
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: prometheus-role-binding
+      subjects:
+      - kind: ServiceAccount
+        name: prometheus
+        namespace: prometheus
+      roleRef:
+        kind: ClusterRole
+        name: prometheus-role
+        apiGroup: rbac.authorization.k8s.io
+
 - name: create smtp secret
   k8s:
     apply: True
@@ -132,6 +173,9 @@
             scrape_interval: 30s
             evaluation_interval: 30s
           scrape_configs:
+          - job_name: 'prometheus'
+            static_configs:
+            - targets: ['localhost:9090']
           - job_name: 'kube-state-metrics'
             static_configs:
             - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
@@ -148,6 +192,31 @@
               target_label: instance
             - target_label: __address__
               replacement: localhost:9115
+          - job_name: 'k8s-nodes'
+            scheme: https
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: true
+            authorization:
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+          - job_name: 'k8s-cadvisor'
+            scheme: https
+            metrics_path: /metrics/cadvisor
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: true
+            authorization:
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
           rule_files: ['/etc/prometheus/rules/*.yml']
           alerting:
             alertmanagers:
@@ -218,6 +287,10 @@
                 name: prometheus-config-vol
               - mountPath: "/etc/prometheus/rules"
                 name: rules-config-vol
+            - name: debug
+              image: ubuntu:focal
+              args: [sleep, Infinity]
+            serviceAccountName: prometheus
             volumes:
             - name: prometheus-data-vol
               persistentVolumeClaim:
