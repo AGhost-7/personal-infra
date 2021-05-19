@@ -59,7 +59,9 @@
         name: prometheus-role
       rules:
       - apiGroups: [""]
-        resources: ["nodes"]
+        resources: 
+        - nodes
+        - nodes/metrics
         verbs: ["get", "list", "watch"]
       - nonResourceURLs: ["/metrics"]
         verbs: ["get"]
