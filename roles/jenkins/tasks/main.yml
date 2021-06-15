@@ -1,6 +1,6 @@
 
 - name: create namespace
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: Namespace
@@ -8,7 +8,7 @@
         name: jenkins
 
 - name: create namespace for jenkins to run jobs in
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: Namespace
@@ -16,7 +16,7 @@
         name: jenkins-job
 
 - name: create jenkins service account
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: ServiceAccount
@@ -25,7 +25,7 @@
         namespace: jenkins
 
 - name: create jenkins role
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
@@ -42,7 +42,7 @@
         verbs: ["get", "list", "watch"]
 
 - name: bind role to jenkins service account
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: RoleBinding
@@ -58,8 +58,8 @@
         name: jenkins-role
         apiGroup: rbac.authorization.k8s.io
 
-- name: create pvc
-  k8s:
+- name: create home pvc
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: PersistentVolumeClaim
@@ -67,15 +67,95 @@
         name: jenkins-home
         namespace: jenkins
       spec:
-        accessModes:
-        - ReadWriteOnce
+        accessModes: [ReadWriteOnce]
         resources:
           requests:
             storage: 2Gi
         storageClassName: "{{ jenkins_storage_class }}"
 
+- name: create plugin pvc
+  community.kubernetes.k8s:
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: jenkins-plugins
+        namespace: jenkins
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: "{{ jenkins_storage_class }}"
+
+- name: create secrets
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: jenkins
+        namespace: jenkins
+      type: Opaque
+      data:
+        github-status-token: "{{ jenkins_github_status_token | b64encode }}"
+        dockerhub-password: "{{ jenkins_dockerhub_password | b64encode }}"
+  notify: re-deploy
+
+- name: create jenkins config
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: jenkins
+        namespace: jenkins
+      data:
+        plugins.txt: |
+          configuration-as-code
+          blueocean
+          kubernetes
+          git
+          workflow-aggregator
+          github-branch-source
+          credentials-binding
+          cloudbees-folder
+          timestamper
+          digitalocean-plugin
+        configuration-as-code.yml: |
+          jenkins:
+            clouds:
+            - kubernetes:
+                name: "kubernetes"
+                containerCap: 2
+                containerCapStr: "2"
+                namespace: jenkins-job
+                jenkinsTunnel: "jenkins.jenkins.svc.cluster.local:"
+          unclassified:
+            gitHubPluginConfig:
+              hookUrl: "https://jenkins.jonathan-boudreau.com/github-webhook/"
+            location:
+              adminAddress: "address not configured yet <nobody@nowhere>"
+              url: "https://jenkins.jonathan-boudreau.com/"
+          credentials:
+            system:
+              domainCredentials:
+              - credentials:
+                - string:
+                    id: "github-status-access-token"
+                    scope: GLOBAL
+                    secret: ${GITHUB_STATUS_TOKEN}
+                - usernamePassword:
+                    id: dockerhub
+                    password: ${DOCKERHUB_PASSWORD}
+                    scope: GLOBAL
+                    username: aghost7
+  notify: re-deploy
+
 - name: create deployment
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -97,9 +177,24 @@
               type: build
               build: jenkins
           spec:
+            initContainers:
+            - name: install-plugins
+              image: "{{ jenkins_image }}"
+              volumeMounts:
+              - mountPath: /var/jenkins_home
+                name: jenkins-home-vol
+              - mountPath: "/usr/share/jenkins/ref/plugins"
+                name: jenkins-plugins-vol
+              - mountPath: /etc/jenkins
+                name: jenkins-config-vol
+                readOnly: true
+              command: [bash]
+              args: 
+                - "-c"
+                - "/usr/local/bin/install-plugins.sh < /etc/jenkins/plugins.txt"
             containers:
             - name: jenkins
-              image: jenkins/jenkins:2.277.3
+              image: "{{ jenkins_image }}"
               resources:
                 limits:
                   cpu: "800m"
@@ -107,17 +202,41 @@
                 requests:
                   cpu: "200m"
                   memory: "300Mi"
+              env:
+              - name: CASC_JENKINS_CONFIG
+                value: "/etc/jenkins/configuration-as-code.yml"
+              - name: GITHUB_STATUS_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: jenkins
+                    key: github-status-token
+              - name: DOCKERHUB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: jenkins
+                    key: dockerhub-password
               volumeMounts:
               - mountPath: "/var/jenkins_home"
                 name: jenkins-home-vol
+              - mountPath: "/usr/share/jenkins/ref/plugins"
+                name: jenkins-plugins-vol
+              - mountPath: /etc/jenkins
+                name: jenkins-config-vol
+                readOnly: true
             serviceAccountName: jenkins
             volumes:
             - name: jenkins-home-vol
               persistentVolumeClaim:
                 claimName: jenkins-home
+            - name: jenkins-plugins-vol
+              persistentVolumeClaim:
+                claimName: jenkins-plugins
+            - name: jenkins-config-vol
+              configMap:
+                name: jenkins
 
 - name: Create jenkins service
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -140,7 +259,7 @@
           name: jnlp
 
 - name: create ingress
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: networking.k8s.io/v1beta1

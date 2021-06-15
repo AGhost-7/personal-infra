@@ -5,11 +5,11 @@
     dest: /tmp/nginx-ingress.yml
 
 - name: install nginx-ingress
-  k8s:
+  community.kubernetes.k8s:
     src: /tmp/nginx-ingress.yml
 
 - name: create entrypoint into cluster
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1

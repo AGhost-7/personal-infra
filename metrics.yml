@@ -1,6 +1,7 @@
-- name: deploy kube-state-metrics
+- name: deploy metrics
   hosts: k3s_master
   roles:
     - prometheus
     - kube_state_metrics
     - grafana
+      #- loki

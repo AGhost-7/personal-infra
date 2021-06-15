@@ -1,6 +1,6 @@
 
 - name: create namespace
-  k8s:
+  community.kubernetes.k8s:
     definition:
       kind: Namespace
       apiVersion: v1
@@ -10,7 +10,7 @@
           component: metric-scraper
 
 - name: create pvc
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: PersistentVolumeClaim
@@ -26,7 +26,7 @@
         storageClassName: "{{ prometheus_storage_class }}"
 
 - name: create alertmanager pvc
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: PersistentVolumeClaim
@@ -41,7 +41,7 @@
         storageClassName: "{{ prometheus_storage_class }}"
 
 - name: create service account
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: ServiceAccount
@@ -50,7 +50,7 @@
         namespace: prometheus
 
 - name: create prometheus role
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
@@ -67,7 +67,7 @@
         verbs: ["get"]
 
 - name: assign role to service account
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: rbac.authorization.k8s.io/v1
@@ -84,7 +84,7 @@
         apiGroup: rbac.authorization.k8s.io
 
 - name: create smtp secret
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -96,7 +96,7 @@
         smtp_auth_password: "{{ prometheus_mail_password }}"
 
 - name: create blackbox config
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -114,7 +114,7 @@
                 preferred_ip_protocol: ip4
 
 - name: create alertmanager config
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -140,7 +140,7 @@
               from: "noreply@alerts.jonathan-boudreau.com"
 
 - name: create rules config
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -161,7 +161,7 @@
                 description: "{{ '{{' }}$labels.instance{{ '}}' }} has been down for 5 minutes."
 
 - name: create prometheus config
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -226,7 +226,7 @@
               - targets: ['localhost:9093']
 
 - name: deploy prometheus pods
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       kind: Deployment
@@ -314,7 +314,7 @@
                 secretName: alertmanager-secret
 
 - name: create prometheus service
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -333,7 +333,7 @@
           name: http
 
 - name: create basic auth secret
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -346,7 +346,7 @@
         auth: "{{ prometheus_htpasswd }}"
 
 - name: expose prometheus
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: networking.k8s.io/v1beta1

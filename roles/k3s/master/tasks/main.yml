@@ -3,16 +3,16 @@
   set_fact:
     private_ip: "{{ ansible_eth1['ipv4']['address'] }}"
 
-- name: open up port for server
-  ufw:
-    state: reloaded
-    policy: allow
-    to_ip: "{{ private_ip }}"
-    to_port: "6443"
-
-- name: make sure the firewall is enabled
-  ufw:
-    state: enabled
+#- name: open up port for server
+#  ufw:
+#    state: reloaded
+#    policy: allow
+#    to_ip: "{{ private_ip }}"
+#    to_port: "6443"
+#
+#- name: make sure the firewall is enabled
+#  ufw:
+#    state: enabled
 
 - name: create systemd unit file
   template:
@@ -46,3 +46,31 @@
     name:
       - kubernetes
       - openshift
+
+- name: check if helm is installed
+  stat:
+    path: /usr/local/bin/helm
+  register: helm
+
+- name: add kubectl link
+  file:
+    src: /usr/local/bin/k3s
+    dest: /usr/local/bin/kubectl
+    state: link
+
+- name: add kube config link
+  file:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    state: link
+
+- name: add shorthands to bashrc
+  blockinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    block: |
+      n=default
+      alias k='kubectl --namespace=$n'
+
+- name: install helm
+  when: not helm.stat.exists
+  include_tasks: ./helm.yml

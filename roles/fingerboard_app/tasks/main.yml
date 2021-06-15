@@ -1,5 +1,5 @@
 - name: create namespace
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: Namespace
@@ -9,7 +9,7 @@
           project: fingerboard
 
 - name: create deployment
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: apps/v1
@@ -42,7 +42,7 @@
                 imagePullPolicy: Always
 
 - name: create service
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -61,7 +61,7 @@
           name: http
 
 - name: create ingress
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: networking.k8s.io/v1beta1

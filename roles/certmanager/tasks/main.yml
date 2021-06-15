@@ -2,15 +2,15 @@
 - name: download manifests
   get_url:
     force: True
-    url: "https://github.com/jetstack/cert-manager/releases/download/v0.16.0/cert-manager.yaml"
+    url: "https://github.com/jetstack/cert-manager/releases/download/v1.3.1/cert-manager.yaml"
     dest: /tmp/cert-manager.yml
 
 - name: install certmanager
-  k8s:
+  community.kubernetes.k8s:
     src: /tmp/cert-manager.yml
 
 - name: create secret
-  k8s:
+  community.kubernetes.k8s:
     definition:
       kind: Secret
       metadata:
@@ -21,7 +21,7 @@
         access-token: "{{ certmanager_digitalocean_key | b64encode }}"
 
 - name: create cert issuer
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: cert-manager.io/v1alpha2
       kind: ClusterIssuer

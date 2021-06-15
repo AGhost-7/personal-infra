@@ -1,0 +1,16 @@
+
+- name: create loki namespace
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: loki
+
+- name: install loki chart
+  community.kubernetes.helm:
+    chart_repo_url: https://grafana.github.io/helm-charts
+    chart_ref: loki
+    namespace: loki
+    name: loki

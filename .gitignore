@@ -3,5 +3,6 @@
 /.terraform
 .terraform.tfstate.lock.info
 /environments
+/.cache
 *.retry
 *.swp

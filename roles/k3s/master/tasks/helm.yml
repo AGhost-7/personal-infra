@@ -1,0 +1,26 @@
+
+- name: download tar
+  get_url:
+    url: https://get.helm.sh/helm-v3.5.4-linux-amd64.tar.gz
+    dest: /tmp/helm.tar.gz
+
+- name: extract tar file
+  unarchive:
+    remote_src: True
+    src: /tmp/helm.tar.gz
+    dest: /tmp
+
+- name: copy helm executable
+  copy:
+    remote_src: True
+    mode: 0700
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+
+- name: clean up
+  with_items:
+  - /tmp/linux-amd64
+  - /tmp/helm.tar.gz
+  file:
+    state: absent
+    path: "{{ item }}"

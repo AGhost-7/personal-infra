@@ -1,6 +1,6 @@
 
 - name: create namespace
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: Namespace
@@ -10,7 +10,7 @@
           project: jokemongo
 
 - name: create persistent volume claim
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: v1
       kind: PersistentVolumeClaim
@@ -26,7 +26,7 @@
         storageClassName: local-path
 
 - name: create jokemongo secret
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -38,7 +38,7 @@
         password: "{{ jokemongo_db_password | b64encode }}"
 
 - name: create mongodb deployment
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: apps/v1
@@ -65,7 +65,7 @@
           spec:
             containers:
             - name: mongo
-              image: "mongo:4.0"
+              image: "mongo:4.1"
               env:
                 - name: MONGO_INITDB_ROOT_USERNAME
                   value: jokemongo
@@ -92,7 +92,7 @@
                 claimName: mongo
 
 - name: create service for mongo
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -109,7 +109,7 @@
           targetPort: 27017
 
 - name: create network policy
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: networking.k8s.io/v1
@@ -131,7 +131,7 @@
                   project: jokemongo
 
 - name: create joke deployment
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: apps/v1
@@ -159,8 +159,14 @@
                 httpGet:
                   path: /healthz
                   port: 8067
-                initialDelaySeconds: 10
-                periodSeconds: 3
+                initialDelaySeconds: 15
+                periodSeconds: 10
+              readinessProbe:
+                httpGet:
+                  path: /healthz
+                  port: 8067
+                  initialDelaySeconds: 5
+                  periodSeconds: 2
               env:
               - name: jokemongo.db.host
                 value: mongo
@@ -180,7 +186,7 @@
                   memory: "150Mi"
 
 - name: create service for joke app
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: v1
@@ -199,7 +205,7 @@
           name: http
 
 - name: create ingress
-  k8s:
+  community.kubernetes.k8s:
     apply: True
     definition:
       apiVersion: networking.k8s.io/v1beta1

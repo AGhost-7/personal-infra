@@ -1,0 +1,2 @@
+- name: re-deploy
+  command: kubectl --namespace=jenkins rollout restart deployment/jenkins
