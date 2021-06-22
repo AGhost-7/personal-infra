@@ -21,6 +21,29 @@
             storage: 1Gi
         storageClassName: "{{ grafana_storage_class }}"
 
+- name: create configuration
+  community.kubernetes.k8s:
+    definition:
+      kind: ConfigMap
+      apiVersion: v1
+      metadata:
+        name: grafana
+        namespace: grafana
+      data:
+        grafana.ini: |
+          admin_password = ${ADMIN_PASSWORD}
+
+- name: create secret
+  community.kubernetes.k8s:
+    definition:
+      kind: Secret
+      apiVersion: v1
+      metadata:
+        name: grafana
+        namespace: grafana
+      data:
+        admin_password: "{{ grafana_password | b64encode }}"
+
 - name: create deployment
   community.kubernetes.k8s:
     apply: True
@@ -57,10 +80,21 @@
               volumeMounts:
               - mountPath: /var/lib/grafana
                 name: grafana-vol
+              - mountPath: /etc/grafana
+                name: grafana-config-vol
+              env:
+              - name: ADMIN_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: grafana
+                    key: admin_password
             volumes:
             - name: grafana-vol
               persistentVolumeClaim:
                 claimName: grafana-data
+            - name: grafana-config-vol
+              configMap:
+                name: grafana
 
 - name: create service
   community.kubernetes.k8s:

@@ -4,4 +4,4 @@
     - prometheus
     - kube_state_metrics
     - grafana
-      #- loki
+    - loki

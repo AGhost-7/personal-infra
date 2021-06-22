@@ -1,2 +1,2 @@
 jenkins_storage_class: local-path
-jenkins_image: jenkins/jenkins:2.277.3
+jenkins_image: jenkins/jenkins:2.289.1

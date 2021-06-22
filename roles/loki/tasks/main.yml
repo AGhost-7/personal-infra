@@ -14,3 +14,13 @@
     chart_ref: loki
     namespace: loki
     name: loki
+
+- name: install promtail
+  community.kubernetes.helm:
+    chart_repo_url: https://grafana.github.io/helm-charts
+    chart_ref: promtail
+    namespace: loki
+    name: promtail
+    values:
+      config:
+        lokiAddress: http://loki:3100/loki/api/v1/push
