@@ -1,0 +1,186 @@
+
+- name: create priority class
+  community.kubernetes.k8s:
+    definition:
+      apiVersion: scheduling.k8s.io/v1
+      kind: PriorityClass
+      metadata:
+        name: prod
+        value: 1000000
+        globalDefault: false
+
+- name: create namespace
+  community.kubernetes.k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: valheim
+
+- name: create valheim bep config
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: valheim-bep
+        namespace: valheim
+      data:
+        valheim_plus.cfg: "{{ lookup('file', 'valheim_plus.cfg') }}"
+        BepInEx.cfg: "{{ lookup('file', 'BepInEx.cfg') }}"
+  notify: re-deploy
+
+- name: create valheim script config
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: valheim-script
+        namespace: valheim
+      data:
+        post-install.sh: "{{ lookup('file', 'post-install.sh') }}"
+  notify: re-deploy
+
+- name: create valheim secret
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: valheim
+        namespace: valheim
+      type: Opaque
+      data:
+        password: "{{ valheim_password | b64encode }}"
+  notify: re-deploy
+
+- name: create pvcs
+  with_items:
+  - { name: "valheim-server", storage: "2Gi" }
+  - { name: "valheim-saves", storage: "1Gi" }
+  community.kubernetes.k8s:
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: "{{ item.name }}"
+        namespace: valheim
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: "{{ item.storage }}"
+          storageClassName: local-path
+
+- name: create deployment
+  register: valheim_deployment
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: valheim
+        namespace: valheim
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            type: game
+            game: valheim
+        template:
+          metadata:
+            labels:
+              type: game
+              game: valheim
+          spec:
+            containers:
+            - name: valheim
+              image: aghost7/valheim
+              env:
+              - name: NAME
+                value: "AGhost-7's Server"
+              - name: TYPE
+                value: ValheimPlus
+              - name: UPDATE_ON_STARTUP
+                value: "1"
+              - name: PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: valheim
+                    key: password
+              - name: HTTP_PORT
+                value: "2459"
+              - name: MODS
+                value: |
+                  https://cdn.thunderstore.io/live/repository/packages/Smoothbrain-CreatureLevelAndLootControl-4.3.3.zip
+                  https://cdn.thunderstore.io/live/repository/packages/RandyKnapp-ExtendedItemDataFramework-1.0.2.zip
+                  https://cdn.thunderstore.io/live/repository/packages/virtuaCode-TrashItems-1.2.3.zip
+              volumeMounts:
+              - mountPath: /home/steam/valheim
+                name: valheim-server-vol
+              - mountPath: /home/steam/.config/unity3d/IronGate/Valheim
+                name: valheim-saves-vol
+              - mountPath: /home/steam/bep-config
+                name: valheim-bep-config-vol
+                readOnly: true
+              - mountPath: /start-valheim-post-install.d/post-install.sh
+                name: valheim-script-config-vol
+                subPath: post-install.sh
+              ports:
+              - containerPort: 2456
+                hostPort: 2456
+                protocol: UDP
+              - containerPort: 2457
+                hostPort: 2457
+                protocol: UDP
+              - containerPort: 2458
+                hostPort: 2458
+                protocol: UDP
+              resources:
+                requests:
+                  cpu: "1500m"
+                  memory: "3000Mi"
+                limits:
+                  cpu: "2000m"
+                  memory: "4000Mi"
+            volumes:
+            - name: valheim-server-vol
+              persistentVolumeClaim:
+                claimName: valheim-server
+            - name: valheim-saves-vol
+              persistentVolumeClaim:
+                claimName: valheim-saves
+            - name: valheim-bep-config-vol
+              configMap:
+                name: valheim-bep
+            - name: valheim-script-config-vol
+              configMap:
+                name: valheim-script
+                defaultMode: 0755
+            priorityClassName: prod
+
+- name: expose metrics
+  community.kubernetes.k8s:
+    apply: True
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: valheim-metric
+        namespace: valheim
+      spec:
+        clusterIP: None
+        selector:
+          type: game
+          game: valheim
+        ports:
+        - port: 2459
+          targetPort: 2459
+          protocol: TCP

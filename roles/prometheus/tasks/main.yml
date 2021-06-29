@@ -185,7 +185,6 @@
             metrics_path: /probe
             static_configs:
               - targets:
-                - "https://jokes.jonathan-boudreau.com"
                 - "https://jenkins.jonathan-boudreau.com"
             relabel_configs:
             - source_labels: [__address__]

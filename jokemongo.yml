@@ -1,4 +1,0 @@
-- name: spin up jokes app
-  hosts: k3s_master
-  roles:
-    - jokemongo

@@ -6,6 +6,14 @@ variable "size" {
 	type = string
 }
 
+variable "size_medium" {
+  type = string
+}
+
+variable "nodes_medium" {
+  type = string
+}
+
 variable "region" {
 	type = string
 }

@@ -1,5 +1,0 @@
-
-- name: spin up fingerboard app
-  hosts: k3s_master
-  roles:
-    - fingerboard_app

@@ -3,17 +3,6 @@
   set_fact:
     private_ip: "{{ ansible_eth1['ipv4']['address'] }}"
 
-#- name: open up port for server
-#  ufw:
-#    state: reloaded
-#    policy: allow
-#    to_ip: "{{ private_ip }}"
-#    to_port: "6443"
-#
-#- name: make sure the firewall is enabled
-#  ufw:
-#    state: enabled
-
 - name: create systemd unit file
   template:
     src: k3s.service.j2
@@ -57,6 +46,11 @@
     src: /usr/local/bin/k3s
     dest: /usr/local/bin/kubectl
     state: link
+
+- name: create config
+  file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
 
 - name: add kube config link
   file:

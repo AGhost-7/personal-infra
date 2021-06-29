@@ -1,0 +1,4 @@
+
+- name: re-deploy
+  when: not valheim_deployment.changed
+  command: kubectl --namespace=valheim rollout restart deployment/valheim

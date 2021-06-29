@@ -6,7 +6,7 @@ After=network-online.target
 
 [Service]
 # reduce memory consumption of k3s server
-Environment='GOGC=25'
+#Environment='GOGC=25'
 Type=notify
 ExecStart=/usr/local/bin/k3s server --bind-address {{ private_ip }} --node-ip {{ private_ip }}
 KillMode=process
