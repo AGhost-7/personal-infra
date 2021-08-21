@@ -122,6 +122,7 @@
                   https://cdn.thunderstore.io/live/repository/packages/Smoothbrain-CreatureLevelAndLootControl-4.3.3.zip
                   https://cdn.thunderstore.io/live/repository/packages/RandyKnapp-ExtendedItemDataFramework-1.0.2.zip
                   https://cdn.thunderstore.io/live/repository/packages/virtuaCode-TrashItems-1.2.3.zip
+                  https://cdn.thunderstore.io/live/repository/packages/xAfflict-NonrestrictedPortals-1.2.1.zip
               volumeMounts:
               - mountPath: /home/steam/valheim
                 name: valheim-server-vol
