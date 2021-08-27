@@ -141,6 +141,7 @@
                 sshKeyId: {{ jenkins_do_ssh_key_id }}
                 authTokenCredentialID: "do-access-token"
                 instanceCap: 1
+                timeoutMinutes: 30
                 templates:
                 - name: "ubuntu"
                   idleTerminationInMinutes: 10
