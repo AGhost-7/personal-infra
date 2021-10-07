@@ -54,7 +54,7 @@ module "k3s" {
 	nodes = 2
   # https://developers.digitalocean.com/documentation/v2/#list-all-sizes
 	size = "s-1vcpu-1gb"
-  nodes_medium = 1
+  nodes_medium = 0
   size_medium = "s-2vcpu-4gb"
 	region = var.region
 	ssh_keys = [digitalocean_ssh_key.default.id]
@@ -126,14 +126,6 @@ resource "digitalocean_record" "k3s" {
 	name = "k3s"
 	type = "A"
 	value = module.k3s.master_ip
-}
-
-resource "digitalocean_record" "valheim" {
-  for_each = toset(module.k3s.node_md_ips)
-	domain = "jonathan-boudreau.com"
-  type = "A"
-  name = "valheim"
-  value = each.value
 }
 
 resource "digitalocean_record" "prom" {

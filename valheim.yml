@@ -1,4 +1,0 @@
-- name: deploy valheim
-  hosts: k3s_master
-  roles:
-    - valheim
