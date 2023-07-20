@@ -1,0 +1,10 @@
+- hosts: all
+  connection: local
+  tasks:
+    - command: "ssh-keyscan {{ ansible_host }}"
+      register: key
+
+    - known_hosts:
+        name: "{{ ansible_host }}"
+        state: present
+        key: "{{ key.stdout }}"

@@ -17,7 +17,7 @@ terraform {
 	required_providers {
 		digitalocean = {
 			source = "digitalocean/digitalocean"
-			version = "~> 2.5.1"
+			version = "~> 2.19.0"
 		}
 	}
 }
@@ -49,16 +49,16 @@ resource "digitalocean_ssh_key" "default" {
 # }}}
 
 # {{{ modules
-module "k3s" {
-	source = "./modules/k3s"
-	nodes = 2
-  # https://developers.digitalocean.com/documentation/v2/#list-all-sizes
-	size = "s-1vcpu-1gb"
-  nodes_medium = 0
-  size_medium = "s-2vcpu-4gb"
-	region = var.region
-	ssh_keys = [digitalocean_ssh_key.default.id]
-}
+#module "k3s" {
+#	source = "./modules/k3s"
+#	nodes = 3
+#  # https://developers.digitalocean.com/documentation/v2/#list-all-sizes
+#	size = "s-1vcpu-1gb"
+#  nodes_medium = 0
+#  size_medium = "s-2vcpu-4gb"
+#	region = var.region
+#	ssh_keys = [digitalocean_ssh_key.default.id]
+#}
 # }}}
 
 # {{{ dns
@@ -121,12 +121,12 @@ resource "digitalocean_record" "alerts_mxb" {
   priority = 10
 }
 
-resource "digitalocean_record" "k3s" {
-	domain = "jonathan-boudreau.com"
-	name = "k3s"
-	type = "A"
-	value = module.k3s.master_ip
-}
+#resource "digitalocean_record" "k3s" {
+#	domain = "jonathan-boudreau.com"
+#	name = "k3s"
+#	type = "A"
+#	value = module.k3s.master_ip
+#}
 
 resource "digitalocean_record" "prom" {
 	domain = "jonathan-boudreau.com"

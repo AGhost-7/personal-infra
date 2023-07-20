@@ -1,15 +1,15 @@
-- hosts: k3s
-  roles:
-  - swap
-  - k3s/common
-
-- hosts: k3s_master
-  roles:
-  - k3s/master
-
-- hosts: k3s_node
-  roles:
-  - k3s/node
+#- hosts: k3s
+#  roles:
+#  - swap
+#  - k3s/common
+#
+#- hosts: k3s_master
+#  roles:
+#  - k3s/master
+#
+#- hosts: k3s_node
+#  roles:
+#  - k3s/node
 
 - hosts: k3s_master
   roles:

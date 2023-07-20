@@ -6,9 +6,8 @@ After=network-online.target
 
 [Service]
 # reduce memory consumption of k3s server
-#Environment='GOGC=25'
 Type=notify
-ExecStart=/usr/local/bin/k3s server --bind-address {{ private_ip }} --node-ip {{ private_ip }}
+ExecStart=/usr/local/bin/k3s server --bind-address {{ private_ip }} --node-ip {{ private_ip }} --node-taint node-role.kubernetes.io/master:NoSchedule --flannel-backend host-gw
 KillMode=process
 Delegate=yes
 LimitNOFILE=1048576

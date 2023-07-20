@@ -8,7 +8,7 @@
 
 - name: download the k3s binary
   get_url:
-    url: "https://github.com/k3s-io/k3s/releases/download/v1.21.1%2Bk3s1/k3s"
+    url: "https://github.com/k3s-io/k3s/releases/download/v1.23.5%2Bk3s1/k3s"
     dest: /usr/local/bin/k3s
     mode: "0755"
   notify:
